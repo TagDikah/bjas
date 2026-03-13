@@ -1,0 +1,52 @@
+﻿import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+
+function homeForRole(role: string) {
+  const r = (role || "").toUpperCase()
+  if (r.includes("ADMIN")) return "/admin"
+  if (r.includes("POLICE")) return "/police"
+  if (r.includes("DPP") || r.includes("PROSECUTOR")) return "/dpp"
+  if (r.includes("COURT") || r.includes("JUDGE")) return "/court"
+  return "/login"
+}
+
+export function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  const auth = req.cookies.get("bejas_auth")?.value
+  const role = req.cookies.get("bejas_role")?.value || ""
+
+  const isLoggedIn = auth === "1"
+  const home = homeForRole(role)
+
+  // If user is logged in, keep them out of /login
+  if (pathname === "/login" && isLoggedIn) {
+    return NextResponse.redirect(new URL(home, req.url))
+  }
+
+  // Protect dashboards
+  const isProtected =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/police") ||
+    pathname.startsWith("/dpp") ||
+    pathname.startsWith("/court")
+
+  if (isProtected && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", req.url))
+  }
+
+  // If logged in but going to wrong dashboard, redirect to correct one
+  if (isLoggedIn) {
+    if (pathname.startsWith("/admin") && home !== "/admin") return NextResponse.redirect(new URL(home, req.url))
+    if (pathname.startsWith("/police") && home !== "/police") return NextResponse.redirect(new URL(home, req.url))
+    if (pathname.startsWith("/dpp") && home !== "/dpp") return NextResponse.redirect(new URL(home, req.url))
+    if (pathname.startsWith("/court") && home !== "/court") return NextResponse.redirect(new URL(home, req.url))
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ["/login", "/admin/:path*", "/police/:path*", "/dpp/:path*", "/court/:path*"],
+}
+

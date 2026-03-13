@@ -1,0 +1,29 @@
+﻿import { fileURLToPath } from "url"
+import path from "path"
+
+/** @type {import("next").NextConfig} */
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const nextConfig = {
+  // Fix monorepo/multiple lockfiles warning
+  outputFileTracingRoot: __dirname,
+
+  // Allow dev assets when you open using 127.0.0.1
+  allowedDevOrigins: ["http://127.0.0.1:3000", "http://localhost:3000"],
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  images: {
+    unoptimized: true,
+  },
+
+  // 🔥 Disable Turbopack to stop dev crashes
+  experimental: {
+    turbo: false,
+  },
+}
+
+export default nextConfig
