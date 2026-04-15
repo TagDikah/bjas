@@ -1,0 +1,25 @@
+services:
+  peer0-org2:
+    image: hyperledger/fabric-peer:2.5
+    container_name: peer0.org2.example.com
+    env_file:
+      - ../../env/org2-peer.env.example
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - /srv/fabric/org2-peer/msp:/etc/hyperledger/fabric/msp:ro
+      - /srv/fabric/org2-peer/tls:/etc/hyperledger/fabric/tls:ro
+      - /srv/fabric/org2-peer/data:/var/hyperledger/production
+    ports:
+      - "9051:9051"
+      - "9443:9443"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z 127.0.0.1 9051"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "10"

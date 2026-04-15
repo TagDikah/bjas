@@ -1,30 +1,29 @@
-"use client"
+﻿"use client"
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
-import { redirectForRole } from "@/lib/redirect"
+import { getRoleRoute } from "@/lib/role-routes"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const currentUser = useStore((s: any) => s.currentUser)
-  const isHydrated = useStore((s: any) => s.isHydrated)
+  const currentUser = useStore((s) => s.currentUser)
 
   useEffect(() => {
-    if (!isHydrated) return
-
     if (!currentUser) {
-      router.replace("/login")
+      router.replace("/")
       return
     }
 
-    const target = redirectForRole(currentUser.role)
-    router.replace(target)
-  }, [isHydrated, currentUser, router])
+    const target = getRoleRoute(currentUser.role)
 
-  return (
-    <div className="p-6">
-      {!isHydrated ? "Loading..." : "Redirecting..."}
-    </div>
-  )
+    if (target && target !== "/dashboard") {
+      router.replace(target)
+      return
+    }
+
+    router.replace("/")
+  }, [currentUser, router])
+
+  return <div className="p-6">Redirecting...</div>
 }

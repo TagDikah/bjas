@@ -210,7 +210,7 @@ export default function ClerkDashboardPage() {
 
           <div className="flex gap-2">
             <Link href="/clerk/dashboardsessions">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button className="bg-primary !text-white hover:bg-primary/90 [&_svg]:!text-white">
                 View Session List
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

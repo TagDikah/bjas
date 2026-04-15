@@ -1,37 +1,41 @@
-import { NextResponse } from "next/server";
-import { getDbPool } from "@/lib/db";
+import { NextResponse } from "next/server"
+import { getDbPool } from "@/lib/db"
+import { readEnv, readPathEnv } from "@/lib/server/env"
 
 /**
  * GET /api/health/db
  * Verifies DB connectivity and returns basic diagnostics (no secrets).
  */
 export async function GET() {
-  const startedAt = Date.now();
+  const startedAt = Date.now()
 
   // Do NOT return passwords/secrets. These values are safe-ish for diagnostics.
-  const host = process.env.DB_HOST ?? "<missing>";
-  const port = process.env.DB_PORT ?? "<missing>";
-  const database = process.env.DB_NAME ?? "<missing>";
+  const host = readEnv("DB_HOST") ?? "<missing>"
+  const port = readEnv("DB_PORT") ?? "<missing>"
+  const database = readEnv("DB_NAME") ?? "<missing>"
 
-  const sslCaPath =
-    process.env.DB_SSL_CA ??
-    process.env.TIDB_SSL_CA ??
-    null;
+  const sslCaPath = readPathEnv("DB_SSL_CA") ?? readPathEnv("TIDB_SSL_CA") ?? null
 
-  const rejectUnauthorized =
-    (process.env.DB_SSL_REJECT_UNAUTHORIZED ?? "true").toLowerCase();
+  const rejectUnauthorized = (
+    readEnv("DB_SSL_REJECT_UNAUTHORIZED", {
+      fallback: "true",
+    }) ?? "true"
+  ).toLowerCase()
 
-  const insecure =
-    (process.env.TIDB_SSL_INSECURE ?? "false").toLowerCase();
+  const insecure = (
+    readEnv("TIDB_SSL_INSECURE", {
+      fallback: "false",
+    }) ?? "false"
+  ).toLowerCase()
 
   try {
-    const pool = getDbPool();
+    const pool = getDbPool()
 
     // Lightweight query + server time (useful to verify actual DB response)
-    const [pingRows] = await pool.query<any[]>("SELECT 1 AS ok");
-    const [nowRows] = await pool.query<any[]>("SELECT NOW() AS serverTime");
+    const [pingRows] = await pool.query<any[]>("SELECT 1 AS ok")
+    const [nowRows] = await pool.query<any[]>("SELECT NOW() AS serverTime")
 
-    const elapsedMs = Date.now() - startedAt;
+    const elapsedMs = Date.now() - startedAt
 
     return NextResponse.json(
       {
@@ -42,7 +46,7 @@ export async function GET() {
           port,
           database,
           tls: {
-            enabled: Boolean(sslCaPath), // our lib/db enables SSL when CA is provided
+            enabled: Boolean(sslCaPath),
             caPath: sslCaPath,
             rejectUnauthorized,
             insecure,
@@ -54,11 +58,10 @@ export async function GET() {
         },
       },
       { status: 200 }
-    );
+    )
   } catch (err: any) {
-    const elapsedMs = Date.now() - startedAt;
+    const elapsedMs = Date.now() - startedAt
 
-    // mysql2 errors often have: code, errno, sqlState
     return NextResponse.json(
       {
         ok: false,
@@ -72,13 +75,12 @@ export async function GET() {
           message: err?.message ?? String(err),
         },
         hints: [
-          "If you see ENOTFOUND: DB_HOST is wrong (or you used 'tidb' outside Docker).",
-          "If you see ECONNRESET / HANDSHAKE_SSL_ERROR: SSL CA path is wrong or IP is not allowlisted in TiDB Cloud.",
-          "Verify cert exists: Test-Path .\\certs\\letsencrypt-bundle.pem",
-          "Verify network: Test-NetConnection <host> -Port 4000",
+          "If you see ENOTFOUND: DB_HOST is wrong.",
+          "If you see ECONNRESET or HANDSHAKE_SSL_ERROR: verify the DB CA secret file and network allowlist.",
+          "For Docker secrets, confirm DB_PASSWORD_FILE and DB_SSL_CA_FILE are mounted.",
         ],
       },
       { status: 500 }
-    );
+    )
   }
 }

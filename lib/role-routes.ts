@@ -1,4 +1,4 @@
-import { toCanonicalRole } from "./roles"
+﻿import { toCanonicalRole } from "./roles"
 
 export const ROLE_ROUTES: Record<string, string> = {
   admin: "/admin",
@@ -9,8 +9,16 @@ export const ROLE_ROUTES: Record<string, string> = {
   police_commissioner: "/commissioner/dashboard",
 
   court_admin: "/court-admin/dashboard",
+  dpp_admin: "/dpp-admin/dashboard",
 
   dpp: "/dpp/dashboard",
+  prosecutor: "/prosecutor/dashboard",
+  prosecution_registry: "/prosecution-registry/dashboard",
+  correctional_services: "/correctional-services/dashboard",
+  correctional_admin: "/correctional-services/dashboard",
+  appeal_registry: "/appeal-registry/dashboard",
+  appeal_judge: "/appeal-registry/dashboard",
+  archive_officer: "/archive/dashboard",
 
   police_investigator: "/investigation/dashboard",
   investigation: "/investigation/dashboard",
@@ -18,7 +26,6 @@ export const ROLE_ROUTES: Record<string, string> = {
   investigation_officer: "/investigation/dashboard",
 
   judge: "/judge/dashboard",
-
   magistrate: "/magistrate",
 
   police_officer: "/police/dashboard",
@@ -26,12 +33,8 @@ export const ROLE_ROUTES: Record<string, string> = {
 
   police_admin: "/police-admin/dashboard",
 
-  prosecutor: "/prosecutor/dashboard",
-
   registry: "/registry/dashboard",
   court_registry: "/registry/dashboard",
-
-  prosecution_registry: "/prosecution-registry/dashboard",
 
   high_court: "/high-court",
   high_court_judge: "/high-court-judge/dashboard",

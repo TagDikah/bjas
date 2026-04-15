@@ -18,6 +18,41 @@ import {
 import { useStore } from "@/lib/store"
 import type { CaseData } from "@/lib/blockchain"
 
+type JudgeCasesView = "pending" | "hearing" | "closed" | "all"
+
+function getStatusGroup(status: string) {
+  const normalized = String(status || "").toLowerCase()
+  if (["sent_to_judge", "assigned_to_judge", "assigned_to_high_court_judge", "assigned_to_small_court_judge"].includes(normalized)) {
+    return "pending"
+  }
+  if (["in_hearing", "in_progress", "high_court_in_progress", "small_court_in_progress", "trial_in_progress"].includes(normalized)) {
+    return "hearing"
+  }
+  if (["closed", "case_closed", "completed", "high_court_completed", "small_court_completed"].includes(normalized)) {
+    return "closed"
+  }
+  return "all"
+}
+
+const viewContent: Record<JudgeCasesView, { title: string; description: string }> = {
+  pending: {
+    title: "Pending Hearings",
+    description: "Cases assigned to you and ready to begin hearing.",
+  },
+  hearing: {
+    title: "In Hearing",
+    description: "Cases already in active hearing or trial progress.",
+  },
+  closed: {
+    title: "Closed Cases",
+    description: "Finalized matters kept for record and review.",
+  },
+  all: {
+    title: "All Assigned Cases",
+    description: "Full workload across all judge-assigned statuses.",
+  },
+}
+
 function PageLoading() {
   return (
     <div className="rounded-lg border border-border bg-card p-6">
@@ -36,9 +71,11 @@ function JudgeCasesContent() {
 
   const initialSearch = searchParams.get("search") ?? ""
   const initialStatus = searchParams.get("status") ?? "all"
+  const initialView = (searchParams.get("view") ?? "all") as JudgeCasesView
 
   const [search, setSearch] = useState(initialSearch)
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus)
+  const [viewFilter, setViewFilter] = useState<JudgeCasesView>(initialView in viewContent ? initialView : "all")
 
   const myCases = useMemo(() => {
     const allCases = getAllCases()
@@ -58,16 +95,22 @@ function JudgeCasesContent() {
         (c.district ?? "").toLowerCase().includes(q)
 
       const matchesStatus = statusFilter === "all" || c.status === statusFilter
-      return matchesSearch && matchesStatus
+      const matchesView = viewFilter === "all" || getStatusGroup(String(c.status || "")) === viewFilter
+      return matchesSearch && matchesStatus && matchesView
     })
 
     return [...filtered].sort(
       (a, b) => new Date(b.dateOpened).getTime() - new Date(a.dateOpened).getTime()
     )
-  }, [myCases, search, statusFilter])
+  }, [myCases, search, statusFilter, viewFilter])
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-white/10 bg-[linear-gradient(135deg,rgba(20,34,63,0.92),rgba(12,23,45,0.96))] p-5 text-white">
+        <div className="text-2xl font-semibold">{viewContent[viewFilter].title}</div>
+        <div className="mt-1 text-sm text-slate-200">{viewContent[viewFilter].description}</div>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
@@ -101,6 +144,27 @@ function JudgeCasesContent() {
             </SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={viewFilter} onValueChange={(value) => setViewFilter(value as JudgeCasesView)}>
+          <SelectTrigger className="w-full sm:w-52 bg-input border-border text-foreground">
+            <SelectValue placeholder="Open a view" />
+          </SelectTrigger>
+
+          <SelectContent className="bg-popover border-border">
+            <SelectItem value="pending" className="text-foreground">
+              Pending Hearings
+            </SelectItem>
+            <SelectItem value="hearing" className="text-foreground">
+              In Hearing
+            </SelectItem>
+            <SelectItem value="closed" className="text-foreground">
+              Closed Cases
+            </SelectItem>
+            <SelectItem value="all" className="text-foreground">
+              All Assigned
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Results Count */}
@@ -126,12 +190,20 @@ function JudgeCasesContent() {
   )
 }
 
-export default function JudgeCasesPage() {
+function JudgeCasesPageContent() {
   return (
     <DashboardLayout allowedRoles={["judge"]} title="My Cases">
       <Suspense fallback={<PageLoading />}>
         <JudgeCasesContent />
       </Suspense>
     </DashboardLayout>
+  )
+}
+
+export default function JudgeCasesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#071426]" />}>
+      <JudgeCasesPageContent />
+    </Suspense>
   )
 }

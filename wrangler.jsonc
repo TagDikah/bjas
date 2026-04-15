@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lesotho-justice-app",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-04-15",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "keep_vars": true,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "lesotho-justice-app"
+    }
+  ],
+  "vars": {
+    "NEXTJS_ENV": "production",
+    "NODE_ENV": "production",
+    "FABRIC_ACCESS_MODE": "bridge",
+    "FABRIC_BRIDGE_TIMEOUT_MS": "15000"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

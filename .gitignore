@@ -9,6 +9,7 @@ chain/artifacts
 chain/cache
 fabric-crypto
 *.log
+localtunnel-url.txt
 dist
 build
 
@@ -17,3 +18,5 @@ build
 *.pem
 
 *.key
+__pycache__/
+*.tsbuildinfo

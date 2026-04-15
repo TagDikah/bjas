@@ -1,6 +1,7 @@
-﻿"use client"
+"use client"
 
 import { useMemo, useState } from "react"
+import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { CaseCard } from "@/components/case-card"
 import { Button } from "@/components/ui/button"
@@ -26,16 +27,9 @@ export default function DppReviewPage() {
   const getAllCases = store.getAllCases ?? (() => [])
   const users = (store.users ?? store.getUsers?.() ?? []) as AppUser[]
 
-  const dppAssignToProsecutor =
-    store.dppAssignToProsecutor ??
-    store.assignToProsecutor ??
-    store.assignProsecutor
-
-  const dppReturnToPolice =
-    store.dppReturnToPolice ??
-    store.returnToPolice ??
-    store.sendBackToPolice
-
+  const dppRegisterCase = store.dppRegisterCase
+  const dppAssignToProsecutor = store.dppAssignToProsecutor
+  const dppReturnToPolice = store.dppReturnToPolice
   const dppEscalateToHighCourt =
     store.dppEscalateToHighCourt ??
     store.escalateToHighCourt ??
@@ -49,7 +43,7 @@ export default function DppReviewPage() {
   const queue = useMemo(
     () =>
       (getAllCases() as AppCase[]).filter((c: AppCase) =>
-        ["submitted_to_dpp", "small_court_requests_high_court"].includes(c.status)
+        ["submitted_to_dpp", "dpp_registry_intake", "small_court_requests_high_court"].includes(c.status)
       ),
     [getAllCases]
   )
@@ -58,12 +52,12 @@ export default function DppReviewPage() {
   const [error, setError] = useState("")
 
   return (
-    <DashboardLayout allowedRoles={["dpp"]} title="DPP Review & Assignment">
+    <DashboardLayout allowedRoles={["dpp"]} title="DPP Review and Assignment">
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Review queue</h2>
           <p className="text-muted-foreground">
-            Assign prosecutors, return to police, or approve escalation to High Court.
+            Register files in the DPP office, assign prosecutors, return matters to police, or approve escalation.
           </p>
         </div>
 
@@ -81,26 +75,44 @@ export default function DppReviewPage() {
 
                 {c.status === "small_court_requests_high_court" ? (
                   <div className="flex gap-2">
+                    <Button asChild className="flex-1" variant="outline">
+                      <Link href={`/dpp/review/${c.caseId}`}>Open Docket</Link>
+                    </Button>
                     <Button
                       className="flex-1"
                       onClick={() => {
                         setError("")
-                        if (!currentUser) {
-                          setError("No current user found.")
-                          return
-                        }
-                        if (typeof dppEscalateToHighCourt !== "function") {
-                          setError("DPP escalation action is not available in the store.")
+                        if (!currentUser || typeof dppEscalateToHighCourt !== "function") {
+                          setError("High Court escalation action is not available.")
                           return
                         }
                         dppEscalateToHighCourt(c.caseId, currentUser)
                       }}
                     >
-                      Approve Escalation → High Court
+                      Approve Escalation
                     </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
+                    <Button asChild variant="outline">
+                      <Link href={`/dpp/review/${c.caseId}`}>Open Docket</Link>
+                    </Button>
+                    {c.status === "submitted_to_dpp" && (
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setError("")
+                          if (!currentUser || typeof dppRegisterCase !== "function") {
+                            setError("DPP register action is not available.")
+                            return
+                          }
+                          dppRegisterCase(c.caseId, currentUser, "Registered in DPP office")
+                        }}
+                      >
+                        Enter DPP
+                      </Button>
+                    )}
+
                     <Select
                       value={selected[c.caseId] || ""}
                       onValueChange={(v) => setSelected((s) => ({ ...s, [c.caseId]: v }))}
@@ -122,24 +134,20 @@ export default function DppReviewPage() {
                         className="flex-1"
                         onClick={() => {
                           setError("")
-                          if (!currentUser) {
-                            setError("No current user found.")
-                            return
-                          }
-                          if (typeof dppAssignToProsecutor !== "function") {
-                            setError("DPP assign action is not available in the store.")
+                          if (!currentUser || typeof dppAssignToProsecutor !== "function") {
+                            setError("DPP assign action is not available.")
                             return
                           }
 
                           const pid = selected[c.caseId]
-                          const p = prosecutors.find((x: AppUser) => x.id === pid)
+                          const prosecutor = prosecutors.find((x: AppUser) => x.id === pid)
 
-                          if (!p) {
+                          if (!prosecutor) {
                             setError("Please select a prosecutor first.")
                             return
                           }
 
-                          dppAssignToProsecutor(c.caseId, currentUser, p)
+                          dppAssignToProsecutor(c.caseId, currentUser, prosecutor)
                         }}
                       >
                         Assign Prosecutor
@@ -149,20 +157,11 @@ export default function DppReviewPage() {
                         variant="destructive"
                         onClick={() => {
                           setError("")
-                          if (!currentUser) {
-                            setError("No current user found.")
+                          if (!currentUser || typeof dppReturnToPolice !== "function") {
+                            setError("DPP return action is not available.")
                             return
                           }
-                          if (typeof dppReturnToPolice !== "function") {
-                            setError("DPP return action is not available in the store.")
-                            return
-                          }
-
-                          dppReturnToPolice(
-                            c.caseId,
-                            currentUser,
-                            "More investigation / missing documents"
-                          )
+                          dppReturnToPolice(c.caseId, currentUser, "More investigation or documents required")
                         }}
                       >
                         Return to Police

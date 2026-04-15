@@ -6,6 +6,7 @@ import { Users, Scale, FileText, UserPlus, Activity, Gavel } from "lucide-react"
 
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { StatsCard } from "@/components/stats-card"
+import { AdminAnalytics } from "@/components/admin-analytics"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,8 +17,15 @@ import type { User, CaseData } from "@/lib/blockchain"
 export default function CourtAdminDashboard() {
   const router = useRouter()
   const store = useStore() as any
+  const [overview, setOverview] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    inactiveUsers: 0,
+    roleCounts: {} as Record<string, number>,
+    users: [] as User[],
+  })
 
-  const users: User[] = (store.users ?? store.getUsers?.() ?? []) as User[]
+  const users: User[] = (overview.users.length > 0 ? overview.users : (store.users ?? store.getUsers?.() ?? [])) as User[]
   const getAllCasesFn: (() => CaseData[]) =
     store.getAllCases ?? store.listCases ?? (() => [])
 
@@ -27,9 +35,10 @@ export default function CourtAdminDashboard() {
   const courtUsers = useMemo(() => {
     return (users ?? []).filter((u: User) =>
       u?.role === "court_admin" ||
-      u?.role === "court_registry" ||
+      u?.role === "registry" ||
       u?.role === "judge" ||
-      u?.role === "clerk"
+      u?.role === "clerk" ||
+      u?.role === "high_court_registry_assistant"
     )
   }, [users])
 
@@ -60,6 +69,23 @@ export default function CourtAdminDashboard() {
   useEffect(() => {
     setRecentStaff(courtUsers.slice(-5).reverse())
   }, [courtUsers])
+
+  useEffect(() => {
+    fetch("/api/admin/overview")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data?.ok) {
+          setOverview({
+            totalUsers: data.totalUsers ?? 0,
+            activeUsers: data.activeUsers ?? 0,
+            inactiveUsers: data.inactiveUsers ?? 0,
+            roleCounts: data.roleCounts ?? {},
+            users: data.users ?? [],
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <DashboardLayout allowedRoles={["court_admin"]} title="Court Admin Dashboard">
@@ -158,6 +184,14 @@ export default function CourtAdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <AdminAnalytics
+          title="Court Admin User Analytics"
+          totalUsers={overview.totalUsers}
+          activeUsers={overview.activeUsers}
+          inactiveUsers={overview.inactiveUsers}
+          roleCounts={overview.roleCounts}
+        />
       </div>
     </DashboardLayout>
   )

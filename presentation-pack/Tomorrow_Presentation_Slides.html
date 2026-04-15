@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4 Users Technology Presentation</title>
+  <style>
+    :root {
+      --ink: #1d2a33;
+      --accent: #0f6b5b;
+      --accent-2: #c96f2d;
+      --panel: rgba(255,255,255,0.84);
+      --muted: #54626d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(201,111,45,0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(15,107,91,0.18), transparent 30%),
+        linear-gradient(135deg, #f7f1e8, #e9efe9 60%, #f2e7dc);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .deck {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .slide {
+      width: min(1120px, 100%);
+      min-height: min(720px, calc(100vh - 48px));
+      display: none;
+      background: var(--panel);
+      border: 1px solid rgba(29,42,51,0.08);
+      border-radius: 28px;
+      box-shadow: 0 22px 60px rgba(29,42,51,0.12);
+      padding: 48px;
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+    .slide.active { display: block; }
+    .slide::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15,107,91,0.16), transparent 70%);
+    }
+    h1, h2 { margin: 0 0 16px; line-height: 1.1; }
+    h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); max-width: 860px; }
+    h2 { font-size: clamp(2rem, 3vw, 3rem); color: var(--accent); }
+    p, li { font-size: clamp(1.08rem, 1.5vw, 1.36rem); line-height: 1.55; }
+    ul { margin: 12px 0 0 20px; }
+    .eyebrow {
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin-top: 24px;
+    }
+    .card {
+      border: 1px solid rgba(29,42,51,0.08);
+      border-radius: 20px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.76);
+    }
+    .card strong { display: block; margin-bottom: 8px; color: var(--accent); }
+    .pill {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(15,107,91,0.1);
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .quote {
+      margin-top: 24px;
+      padding: 20px 24px;
+      border-left: 6px solid var(--accent-2);
+      background: rgba(201,111,45,0.08);
+      border-radius: 14px;
+      font-size: clamp(1.15rem, 1.6vw, 1.5rem);
+      line-height: 1.5;
+    }
+    .footer {
+      position: absolute;
+      left: 48px;
+      right: 48px;
+      bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .controls {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(15,107,91,0.24);
+    }
+    button.secondary { background: var(--accent-2); }
+    @media (max-width: 800px) {
+      .slide { padding: 28px; min-height: calc(100vh - 24px); }
+      .grid { grid-template-columns: 1fr; }
+      .footer { left: 28px; right: 28px; bottom: 20px; }
+      .controls { left: 20px; right: 20px; justify-content: space-between; }
+      button { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <section class="slide active">
+      <div class="eyebrow">Team Presentation</div>
+      <h1>Justice Case Management System With Next.js, Node.js, TiDB, and Blockchain</h1>
+      <p>This presentation is divided by technology so that each team member explains one clear part of the system.</p>
+      <div style="margin-top:28px;">
+        <span class="pill">Next.js</span>
+        <span class="pill">Node.js</span>
+        <span class="pill">TiDB</span>
+        <span class="pill">Blockchain</span>
+      </div>
+      <div class="footer"><span>Four users, one system story.</span><span>1 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">Opening</div>
+      <h2>Problem Statement</h2>
+      <p>Manual or weakly protected justice case systems make it difficult to manage records, track workflow changes, and prove that sensitive case data has not been tampered with.</p>
+      <div class="grid">
+        <div class="card"><strong>Operational challenge</strong>Case information must move across police, investigation, registry, and review stages.</div>
+        <div class="card"><strong>Integrity challenge</strong>Important changes must be traceable and verifiable.</div>
+      </div>
+      <div class="quote">We need a digital case management system that is easy to use, structured in storage, and strong in integrity verification.</div>
+      <div class="footer"><span>User 1 should present this first.</span><span>2 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">Opening</div>
+      <h2>SMART Objective</h2>
+      <p>To build a justice case management system that allows users to capture, process, store, and verify case records using Next.js, Node.js, TiDB, and blockchain, with traceable workflow actions and integrity checks during the project demonstration period.</p>
+      <div class="grid">
+        <div class="card"><strong>Specific</strong>Digital case capture, processing, storage, and verification.</div>
+        <div class="card"><strong>Measurable</strong>Cases can be created, stored, and anchored successfully.</div>
+        <div class="card"><strong>Achievable</strong>Uses one integrated web stack and clear module separation.</div>
+        <div class="card"><strong>Relevant</strong>Supports accountability and trust in justice workflows.</div>
+      </div>
+      <div class="footer"><span>Problem first, objective second.</span><span>3 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">System Flow</div>
+      <h2>Best Team Order</h2>
+      <ul>
+        <li>1. Next.js</li>
+        <li>2. Node.js</li>
+        <li>3. TiDB</li>
+        <li>4. Blockchain</li>
+      </ul>
+      <div class="quote">Next.js handles the interface, Node.js handles the logic, TiDB stores the full data, and blockchain provides proof of integrity.</div>
+      <p><strong>Reason for this order:</strong> it follows the real system flow from user interface to backend logic to data storage to integrity verification.</p>
+      <div class="footer"><span>User interface -> logic -> storage -> proof.</span><span>4 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">User 1</div>
+      <h2>Next.js</h2>
+      <p><strong>What to say:</strong> “My part is Next.js. It handles the user interface and the API routes. Users interact with forms and pages here, and the requests are sent to the backend for processing.”</p>
+      <div class="grid">
+        <div class="card"><strong>Part to present</strong>Frontend pages, API routes, user interaction, form submission flow.</div>
+        <div class="card"><strong>Files</strong>`app/police/new-case/page.tsx`<br>`app/api/auth/login/route.ts`<br>`app/api/cases/route.ts`<br>`app/api/blockchain/anchor/route.ts`</div>
+        <div class="card"><strong>Functions</strong>`POST()` in login route<br>`GET()` and `POST()` in cases route<br>`POST()` in blockchain anchor route<br>`buildCasePayload()`</div>
+        <div class="card"><strong>Short line</strong>“I explain Next.js, which handles pages, forms, and API routes.”</div>
+      </div>
+      <div class="footer"><span>User 1 opens the demo story.</span><span>5 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">User 2</div>
+      <h2>Node.js</h2>
+      <p><strong>What to say:</strong> “My part is Node.js. It handles the server-side logic such as authentication, case processing, workflow control, and system actions behind the scenes.”</p>
+      <div class="grid">
+        <div class="card"><strong>Part to present</strong>Backend logic, authentication handling, workflow processing, server-side case management.</div>
+        <div class="card"><strong>Files</strong>`lib/server/cases.ts`<br>`lib/server/auth-session.ts`<br>`lib/server/users.ts`</div>
+        <div class="card"><strong>Functions</strong>`parseSessionValue()`<br>`getSessionUserFromRequest()`<br>`createAndSubmitCase()`<br>`listCases()`<br>`checkpointPoliceCaseStep()`</div>
+        <div class="card"><strong>Short line</strong>“I explain Node.js, which handles backend logic and workflow processing.”</div>
+      </div>
+      <div class="footer"><span>User 2 explains what happens behind the scenes.</span><span>6 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">User 3</div>
+      <h2>TiDB</h2>
+      <p><strong>What to say:</strong> “My part is TiDB. It stores the full operational case data such as users, case details, evidence, and audit records in a structured SQL database.”</p>
+      <div class="grid">
+        <div class="card"><strong>Part to present</strong>Database storage, secure connection, structured records, SQL-based data management.</div>
+        <div class="card"><strong>Files</strong>`lib/db.ts`<br>`db/offchain.sql`<br>TiDB pool configuration files</div>
+        <div class="card"><strong>Functions</strong>`getDbPool()`<br>`readCaIfProvided()`<br>`toBool()`</div>
+        <div class="card"><strong>Strong line</strong>“TiDB stores the full business record.”</div>
+      </div>
+      <div class="footer"><span>User 3 explains storage and database trust.</span><span>7 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">User 4</div>
+      <h2>Blockchain</h2>
+      <p><strong>What to say:</strong> “My part is blockchain. It does not store the full case data. Instead, it stores a cryptographic fingerprint of the case so that any unauthorized change can be detected.”</p>
+      <div class="grid">
+        <div class="card"><strong>Part to present</strong>Integrity verification, hash generation, smart contract interaction, tamper evidence.</div>
+        <div class="card"><strong>Files</strong>`lib/blockchain/case-anchor.ts`<br>`chain/contracts/CaseAnchor.sol`<br>blockchain API route if needed</div>
+        <div class="card"><strong>Functions</strong>`getContract()`<br>`makeCaseHash()`<br>`anchorCaseOnChain()`</div>
+        <div class="card"><strong>Strong line</strong>“Blockchain stores proof of integrity and critical action history.”</div>
+      </div>
+      <div class="footer"><span>User 4 closes the technical story with integrity verification.</span><span>8 / 9</span></div>
+    </section>
+
+    <section class="slide">
+      <div class="eyebrow">Closing</div>
+      <h2>Combined Team Line</h2>
+      <div class="quote">Next.js handles the interface, Node.js handles the logic, TiDB stores the full data, and blockchain provides proof of integrity.</div>
+      <p style="margin-top:24px;"><strong>Final important sentence:</strong> “The database stores the full business record, while blockchain stores proof of integrity and critical action history.”</p>
+      <p><strong>Very short closing:</strong> This system combines usability, backend control, structured storage, and tamper evidence in one platform.</p>
+      <div class="footer"><span>End with the combined team message.</span><span>9 / 9</span></div>
+    </section>
+  </div>
+
+  <div class="controls">
+    <button class="secondary" onclick="move(-1)">Previous</button>
+    <button onclick="move(1)">Next</button>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let index = 0;
+    function render() {
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+    }
+    function move(delta) {
+      index = (index + delta + slides.length) % slides.length;
+      render();
+    }
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === ' ') move(1);
+      if (event.key === 'ArrowLeft') move(-1);
+    });
+  </script>
+</body>
+</html>

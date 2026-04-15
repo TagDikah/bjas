@@ -122,7 +122,7 @@ export default function SmallCourtIntakePage() {
                 </Select>
 
                 <Button
-                  className="w-full"
+                  className="w-full text-white"
                   onClick={() => {
                     if (!currentUser) return
 

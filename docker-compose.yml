@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   mysql:
     image: mysql:8.0
@@ -32,10 +30,25 @@ services:
       DB_USER: ${DB_USER:-app_user}
       DB_PASSWORD: ${DB_PASSWORD:-change_me}
       DB_NAME: ${DB_NAME:-blockchain}
+      JUDGE_AI_SERVICE_URL: http://ai-judge:5000
     ports:
       - "3000:3000"
     depends_on:
       - mysql
+      - ai-judge
+
+  ai-judge:
+    build:
+      context: ./ai
+    environment:
+      HF_MODEL_ID: ${HF_MODEL_ID:-google/flan-t5-base}
+      HF_API_TOKEN: ${HF_API_TOKEN:-}
+      HF_API_URL: ${HF_API_URL:-}
+    ports:
+      - "5000:5000"
+    volumes:
+      - hf_cache:/root/.cache/huggingface
 
 volumes:
   mysql_data:
+  hf_cache:

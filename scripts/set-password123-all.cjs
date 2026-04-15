@@ -41,17 +41,22 @@ if (!fs.existsSync(caPath)) {
 }
 
 const emails = [
-  "admin@bejas.local",
-  "dpp.prosecutor1@bejas.local",
-  "dpp.registry1@bejas.local",
-  "high.assist1@bejas.local",
-  "high.registry1@bejas.local",
-  "judge1@bejas.local",
-  "magistrate1@bejas.local",
-  "mag.assist1@bejas.local",
-  "mag.registry1@bejas.local",
-  "police.investigator1@bejas.local",
-  "police.registry1@bejas.local",
+  "system.admin@justice.gov.ls",
+  "police.admin@police.gov.ls",
+  "police.commissioner@police.gov.ls",
+  "police.investigator1@police.gov.ls",
+  "police.registry1@police.gov.ls",
+  "dpp.admin@justice.gov.ls",
+  "dpp.prosecutor1@justice.gov.ls",
+  "dpp.registry1@justice.gov.ls",
+  "court.admin@judiciary.gov.ls",
+  "high.assistant.registry1@judiciary.gov.ls",
+  "high.registry1@judiciary.gov.ls",
+  "judge1@judiciary.gov.ls",
+  "judge.clerk1@judiciary.gov.ls",
+  "magistrate1@judiciary.gov.ls",
+  "mag.assistant.registry1@judiciary.gov.ls",
+  "mag.registry1@judiciary.gov.ls",
 ]
 
 async function main() {

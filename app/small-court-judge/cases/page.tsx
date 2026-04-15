@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { CaseCard } from "@/components/case-card"
 import { Button } from "@/components/ui/button"
@@ -19,7 +20,9 @@ export default function SmallCourtJudgeCasesPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {mine.map((c) => (
               <div key={c.caseId} className="space-y-2">
-                <CaseCard caseData={c} showAssignment />
+                <Link href={`/small-court-judge/cases/${c.caseId}`}>
+                  <CaseCard caseData={c} showAssignment />
+                </Link>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     variant="secondary"

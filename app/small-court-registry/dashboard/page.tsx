@@ -24,7 +24,7 @@ export default function SmallCourtRegistryDashboard() {
             <p className="text-muted-foreground">Intake cases from prosecution and assign to Small Court judges.</p>
           </div>
           <Link href="/small-court-registry/dashboardintake">
-            <Button>
+            <Button className="!text-white hover:!text-white [&_svg]:text-white">
               Open Intake
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

@@ -4,7 +4,6 @@ import { useMemo, useState, Suspense } from "react"
 import { Search, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { CaseCard } from "@/components/case-card"
 import { Input } from "@/components/ui/input"
@@ -13,15 +12,7 @@ import { useStore } from "@/lib/store"
 import type { CaseData } from "@/lib/blockchain"
 
 function PageLoading() {
-  return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <div className="space-y-3">
-        <div className="h-5 w-56 rounded bg-muted animate-pulse" />
-        <div className="h-4 w-80 rounded bg-muted animate-pulse" />
-        <div className="h-24 w-full rounded bg-muted animate-pulse" />
-      </div>
-    </div>
-  )
+  return <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">Loading assignment queue...</div>
 }
 
 function Content() {
@@ -33,25 +24,27 @@ function Content() {
 
   const sortedCases = useMemo(() => {
     const all = getAllCases()
-
-    // âœ… High Court judge assignment happens after High Court registry intake
     const ready = all.filter((c: CaseData) => c.status === "high_court_registry_intake")
-
     const q = search.trim().toLowerCase()
+
     const filtered = q
-      ? ready.filter((c: CaseData) => {
-          return (
-            (c.parties ?? "").toLowerCase().includes(q) ||
-            (c.caseNumber ?? "").toLowerCase().includes(q) ||
-            (c.charge ?? "").toLowerCase().includes(q) ||
-            (c.district ?? "").toLowerCase().includes(q) ||
-            (c.court?.courtCaseNumber ?? "").toLowerCase().includes(q)
-          )
-        })
+      ? ready.filter((c: CaseData) =>
+          [
+            c.parties,
+            c.caseNumber,
+            c.charge,
+            c.district,
+            c.court?.courtCaseNumber,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(q)
+        )
       : ready
 
     return [...filtered].sort(
-      (a, b) => new Date(b.dateOpened).getTime() - new Date(a.dateOpened).getTime()
+      (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
     )
   }, [getAllCases, search])
 
@@ -62,9 +55,9 @@ function Content() {
           <Sparkles className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-foreground">AI Judge Assignment (High Court)</h2>
+          <h2 className="text-lg font-semibold text-foreground">AI Judge and Clerk Assignment</h2>
           <p className="text-sm text-muted-foreground">
-            Select an intake case to get AI workload recommendations and assign a High Court judge.
+            Select an intake case to see workload-based recommendations for judge and clerk assignment.
           </p>
         </div>
       </div>
@@ -83,7 +76,7 @@ function Content() {
         <p className="text-sm text-muted-foreground">
           {sortedCases.length} case{sortedCases.length !== 1 ? "s" : ""} awaiting assignment
         </p>
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+        <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
           AI Ready
         </Badge>
       </div>
@@ -91,7 +84,7 @@ function Content() {
       {sortedCases.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {sortedCases.map((caseData: CaseData) => (
-            <Link key={caseData.caseId} href={`/high-court-registry/dashboardassistant/assign/${caseData.caseId}`}>
+            <Link key={caseData.caseId} href={`/high-court-registry/assistant/process-form?caseId=${encodeURIComponent(caseData.caseId)}`}>
               <CaseCard caseData={caseData} showAssignment onClick={() => {}} />
             </Link>
           ))}
@@ -107,7 +100,7 @@ function Content() {
   )
 }
 
-export default function HighCourtAIAssignmentPage() {
+function HighCourtAIAssignmentPageContent() {
   return (
     <DashboardLayout
       allowedRoles={["high_court_registry_assistant", "high_court_registry", "court_registry"]}
@@ -117,5 +110,13 @@ export default function HighCourtAIAssignmentPage() {
         <Content />
       </Suspense>
     </DashboardLayout>
+  )
+}
+
+export default function HighCourtAIAssignmentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#071426]" />}>
+      <HighCourtAIAssignmentPageContent />
+    </Suspense>
   )
 }

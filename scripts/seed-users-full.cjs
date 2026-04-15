@@ -10,6 +10,10 @@ const mysql = require("mysql2/promise")
 const crypto = require("crypto")
 const fs = require("fs")
 const path = require("path")
+const dns = require("dns")
+const { USERS: users } = require("./user-directory.cjs")
+
+try { dns.setDefaultResultOrder("ipv4first") } catch {}
 
 function envAny(...keys) {
   for (const k of keys) {
@@ -25,7 +29,8 @@ const user = envAny("DB_USER", "TIDB_USER")
 const password = envAny("DB_PASSWORD", "TIDB_PASSWORD")
 const database = envAny("DB_NAME", "TIDB_DATABASE", "DB_DATABASE")
 
-const caRel = envAny("DB_SSL_CA", "TIDB_SSL_CA")
+const caRel = envAny("DB_SSL_CA", "TIDB_SSL_CA", "TIDB_CA")
+const rejectUnauthorized = (envAny("DB_SSL_REJECT_UNAUTHORIZED") || "true").toLowerCase() === "true"
 const insecure = (envAny("DB_SSL_INSECURE", "TIDB_SSL_INSECURE") || "false").toLowerCase() === "true"
 
 if (!host || !user || !password || !database) {
@@ -45,25 +50,6 @@ if (!fs.existsSync(caPath)) {
   process.exit(1)
 }
 
-const users = [
-  { id: "u_admin", role: "ADMIN", name: "System Admin", fullname: "System Admin", email: "admin@bejas.local", department: "ADMIN", station: "HQ", badge: "0001" },
-
-  { id: "u_dpp_prosecutor_1", role: "DPP_PROSECUTOR", name: "DPP Prosecutor 1", fullname: "DPP Prosecutor 1", email: "dpp.prosecutor1@bejas.local", department: "DPP", station: "HQ", badge: "DPP-0001" },
-  { id: "u_dpp_registry_1", role: "DPP_REGISTRY", name: "DPP Registry 1", fullname: "DPP Registry 1", email: "dpp.registry1@bejas.local", department: "DPP", station: "HQ", badge: "DPP-REG-0001" },
-
-  { id: "u_high_assist_registry_1", role: "HIGH_ASSIST_REGISTRY", name: "High Assistant Registry 1", fullname: "High Assistant Registry 1", email: "high.assist1@bejas.local", department: "HIGH_COURT", station: "HQ", badge: "HC-AR-0001" },
-  { id: "u_high_registry_1", role: "HIGH_REGISTRY", name: "High Court Registry 1", fullname: "High Court Registry 1", email: "high.registry1@bejas.local", department: "HIGH_COURT", station: "HQ", badge: "HC-R-0001" },
-
-  { id: "u_judge_1", role: "JUDGE", name: "High Court Judge 1", fullname: "High Court Judge 1", email: "judge1@bejas.local", department: "HIGH_COURT", station: "HQ", badge: "J-0001" },
-
-  { id: "u_magistrate_1", role: "MAGISTRATE", name: "Magistrate 1", fullname: "Magistrate 1", email: "magistrate1@bejas.local", department: "MAG_COURT", station: "HQ", badge: "M-0001" },
-  { id: "u_mag_assist_registry_1", role: "MAG_ASSIST_REGISTRY", name: "Mag Assistant Registry 1", fullname: "Mag Assistant Registry 1", email: "mag.assist1@bejas.local", department: "MAG_COURT", station: "HQ", badge: "MC-AR-0001" },
-  { id: "u_mag_registry_1", role: "MAG_REGISTRY", name: "Magistrate Registry 1", fullname: "Magistrate Registry 1", email: "mag.registry1@bejas.local", department: "MAG_COURT", station: "HQ", badge: "MC-R-0001" },
-
-  { id: "u_police_investigator_1", role: "POLICE_INVESTIGATOR", name: "Police Investigator 1", fullname: "Police Investigator 1", email: "police.investigator1@bejas.local", department: "POLICE", station: "HQ", badge: "P-INV-0001" },
-  { id: "u_police_registry_1", role: "POLICE_REGISTRY", name: "Police Registry 1", fullname: "Police Registry 1", email: "police.registry1@bejas.local", department: "POLICE", station: "HQ", badge: "P-REG-0001" },
-]
-
 function hex32() {
   return crypto.randomBytes(32).toString("hex")
 }
@@ -76,9 +62,11 @@ async function main() {
     password,
     database,
     ssl: {
-      ca: fs.readFileSync(caPath, "utf8"),
-      rejectUnauthorized: !insecure,
+      ca: fs.readFileSync(caPath),
+      rejectUnauthorized: insecure ? false : rejectUnauthorized,
+      servername: host,
     },
+    connectTimeout: 20000,
   })
 
   const sql = `
@@ -87,6 +75,7 @@ INSERT INTO users
 VALUES
   (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NOW(), 'u_admin', NULL, ?)
 ON DUPLICATE KEY UPDATE
+  email=VALUES(email),
   role=VALUES(role),
   name=VALUES(name),
   department=VALUES(department),

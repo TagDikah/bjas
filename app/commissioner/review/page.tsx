@@ -18,16 +18,16 @@ export default function CommissionerReviewPage() {
 
   const filteredCases = pendingCases.filter(c => {
     return (
-      c.parties.toLowerCase().includes(search.toLowerCase()) ||
+      (c.parties || "").toLowerCase().includes(search.toLowerCase()) ||
       c.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
-      c.charge.toLowerCase().includes(search.toLowerCase()) ||
-      c.district.toLowerCase().includes(search.toLowerCase()) ||
-      c.policeOfficerName.toLowerCase().includes(search.toLowerCase())
+      (c.charge || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.district || "").toLowerCase().includes(search.toLowerCase()) ||
+      (c.policeOfficerName || "").toLowerCase().includes(search.toLowerCase())
     )
   })
 
   const sortedCases = [...filteredCases].sort((a, b) => 
-    new Date(a.dateOpened).getTime() - new Date(b.dateOpened).getTime()
+    new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
   )
 
   return (
@@ -54,7 +54,7 @@ export default function CommissionerReviewPage() {
           {sortedCases.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {sortedCases.map(caseData => (
-                <Link key={caseData.caseId} href={`/commissioner/dashboardreview/${caseData.caseId}`}>
+                <Link key={caseData.caseId} href={`/commissioner/review/${caseData.caseId}`}>
                   <CaseCard caseData={caseData} onClick={() => {}} />
                 </Link>
               ))}

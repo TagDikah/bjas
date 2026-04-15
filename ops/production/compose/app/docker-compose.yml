@@ -1,0 +1,84 @@
+services:
+  web:
+    build:
+      context: ../../..
+    container_name: justice-web
+    env_file:
+      - ../../env/app.env.example
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_SSL_CA_FILE: /run/secrets/db_ca
+      FABRIC_TLS_CERT_PATH: /run/secrets/fabric_tls_cert
+      FABRIC_CLIENT_CERT_PATH: /run/secrets/fabric_client_cert
+      FABRIC_CLIENT_KEY_PATH: /run/secrets/fabric_client_key
+    secrets:
+      - db_password
+      - db_ca
+      - fabric_tls_cert
+      - fabric_client_cert
+      - fabric_client_key
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      ai-judge:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health/system').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  ai-judge:
+    build:
+      context: ../../../ai
+    container_name: justice-ai-judge
+    secrets:
+      - hf_api_token
+    environment:
+      HF_MODEL_ID: ${HF_MODEL_ID:-google/flan-t5-base}
+      HF_API_TOKEN_FILE: /run/secrets/hf_api_token
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5).status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: justice-nginx
+    depends_on:
+      web:
+        condition: service_healthy
+    volumes:
+      - ../../nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /srv/justice/nginx/certs:/etc/nginx/certs:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+secrets:
+  db_password:
+    file: /srv/justice/secrets/db_password.txt
+  db_ca:
+    file: /srv/justice/secrets/db_ca.pem
+  fabric_tls_cert:
+    file: /srv/justice/secrets/fabric_tls_cert.pem
+  fabric_client_cert:
+    file: /srv/justice/secrets/fabric_client_cert.pem
+  fabric_client_key:
+    file: /srv/justice/secrets/fabric_client_key.pem
+  hf_api_token:
+    file: /srv/justice/secrets/hf_api_token.txt

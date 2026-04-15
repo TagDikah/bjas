@@ -1,16 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { Search, Clock } from "lucide-react"
 import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { CaseCard } from "@/components/case-card"
 import { Input } from "@/components/ui/input"
 import { useStore } from "@/lib/store"
-import { useSearchParams, Suspense } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Loading from "./loading"
 
-export default function RegistryPendingPage() {
+function RegistryPendingPageContent() {
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get("search") || ""
   const { getAllCases } = useStore()
@@ -83,5 +83,13 @@ export default function RegistryPendingPage() {
         </Suspense>
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function RegistryPendingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#071426]" />}>
+      <RegistryPendingPageContent />
+    </Suspense>
   )
 }

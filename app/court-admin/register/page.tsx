@@ -1,458 +1,663 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Scale, Lock, CheckCircle, AlertCircle, Gavel } from "lucide-react"
-
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useStore } from "@/lib/store"
-import type { User } from "@/lib/blockchain"
 
-type CourtRole = Extract<User["role"], "judge" | "court_registry" | "clerk">
+const COURT_ROLE_OPTIONS = [
+  { value: "court_admin", label: "Court Admin", accessLevel: "Full Access" },
+  { value: "registry", label: "Court Registry", accessLevel: "Limited Access" },
+  { value: "judge", label: "Judge", accessLevel: "Full Access" },
+  { value: "clerk", label: "Judge Clerk", accessLevel: "Limited Access" },
+  { value: "high_court_registry_assistant", label: "Registry Assistant", accessLevel: "Limited Access" },
+  { value: "appeal_registry", label: "Appeal Registry", accessLevel: "Limited Access" },
+  { value: "appeal_judge", label: "Appeal Judge", accessLevel: "Full Access" },
+  { value: "archive_officer", label: "Archive Officer", accessLevel: "Limited Access" },
+] as const
 
-export default function CourtStaffRegistration() {
-  const router = useRouter()
-  const store = useStore() as any
-  const currentUser = store.currentUser
-  const users = (store.users ?? store.getUsers?.() ?? []) as User[]
-  const registerUser = store.registerUser ?? store.createUser ?? store.addUser;
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState("")
+const GENDERS = ["Male", "Female", "Other"] as const
+const EMPLOYMENT_STATUSES = ["Active", "Suspended", "Retired"] as const
+const COURT_TITLES = [
+  "Court Administrator",
+  "Registry Officer",
+  "Registry Assistant",
+  "Judge",
+  "Clerk",
+  "Appeal Judge",
+  "Archive Officer",
+] as const
+const JUDICIARY_DEPARTMENTS = [
+  "JUDICIARY",
+  "HIGH COURT REGISTRY",
+  "APPEAL COURT",
+  "ARCHIVE OFFICE",
+] as const
+const COURT_STATIONS = [
+  "HIGH COURT",
+  "COURT REGISTRY",
+  "APPEAL COURT",
+  "ARCHIVE OFFICE",
+] as const
+const COURT_REGIONS = ["Maseru", "Leribe", "Berea", "Mafeteng"] as const
+const SECURITY_QUESTIONS = [
+  "What is your mother's maiden name?",
+  "What was the name of your first school?",
+  "What is your favorite childhood place?",
+  "What was your first service posting?",
+] as const
+const PERMISSION_OPTIONS = [
+  { key: "createCases", label: "Create Cases" },
+  { key: "editCases", label: "Edit Cases" },
+  { key: "viewCases", label: "View Cases" },
+  { key: "assignCases", label: "Assign Cases" },
+  { key: "approveCases", label: "Approve Cases" },
+  { key: "uploadEvidence", label: "Upload Evidence" },
+  { key: "viewReports", label: "View Reports" },
+] as const
+const STEPS = [
+  { id: 1, title: "Account Information" },
+  { id: 2, title: "Personal Details" },
+  { id: 3, title: "Professional Details" },
+  { id: 4, title: "Court Assignment" },
+  { id: 5, title: "Role Permissions" },
+  { id: 6, title: "Security Details" },
+  { id: 7, title: "System Metadata" },
+  { id: 8, title: "Review & Submit" },
+] as const
 
-  const judges = useMemo(
-    () => users.filter((u: User) => u.role === "judge"),
-    [users]
-  )
+type PermissionKey = (typeof PERMISSION_OPTIONS)[number]["key"]
 
-  const [generatedKeys, setGeneratedKeys] = useState<{
-    publicKey: string
-    privateKey: string
-  } | null>(null)
+const DEFAULT_PERMISSIONS: Record<string, Record<PermissionKey, boolean>> = {
+  court_admin: {
+    createCases: true,
+    editCases: true,
+    viewCases: true,
+    assignCases: true,
+    approveCases: true,
+    uploadEvidence: true,
+    viewReports: true,
+  },
+  registry: {
+    createCases: true,
+    editCases: true,
+    viewCases: true,
+    assignCases: true,
+    approveCases: false,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+  judge: {
+    createCases: false,
+    editCases: true,
+    viewCases: true,
+    assignCases: false,
+    approveCases: true,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+  clerk: {
+    createCases: false,
+    editCases: true,
+    viewCases: true,
+    assignCases: false,
+    approveCases: false,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+  high_court_registry_assistant: {
+    createCases: true,
+    editCases: true,
+    viewCases: true,
+    assignCases: true,
+    approveCases: false,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+  appeal_registry: {
+    createCases: true,
+    editCases: true,
+    viewCases: true,
+    assignCases: true,
+    approveCases: false,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+  appeal_judge: {
+    createCases: false,
+    editCases: true,
+    viewCases: true,
+    assignCases: false,
+    approveCases: true,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+  archive_officer: {
+    createCases: false,
+    editCases: false,
+    viewCases: true,
+    assignCases: false,
+    approveCases: false,
+    uploadEvidence: false,
+    viewReports: true,
+  },
+}
 
-  const [formData, setFormData] = useState({
-    name: "",
+function getRoleConfig(role: string) {
+  return COURT_ROLE_OPTIONS.find((item) => item.value === role) ?? COURT_ROLE_OPTIONS[0]
+}
+
+function buildDefaultForm(currentUser: any) {
+  const role = "court_admin"
+  return {
     email: "",
-    role: "" as CourtRole | "",
-    employeeId: "",
-    court: "High Court Maseru",
-    chamber: "",
-    specialization: "",
-    phoneNumber: "",
-    address: "",
+    password: "password123",
+    confirmPassword: "password123",
+    role,
+    fullname: "",
+    gender: "Male",
     dateOfBirth: "",
     nationalId: "",
-    emergencyContact: "",
-    assignedJudgeId: "",
-    notes: "",
-  })
+    phoneNumber: "",
+    residentialAddress: "",
+    title: "Court Administrator",
+    badge: "",
+    yearsOfService: "",
+    employmentStatus: "Active",
+    department: "JUDICIARY",
+    station: "HIGH COURT",
+    region: "Maseru",
+    accessLevel: getRoleConfig(role).accessLevel,
+    permissions: { ...DEFAULT_PERMISSIONS[role] },
+    securityQuestion: SECURITY_QUESTIONS[0],
+    securityAnswer: "",
+    twoFactorEnabled: true,
+    createdBy: currentUser?.id || "Current Admin Session",
+    dateCreated: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
+    blockchainAnchorStatus: "Pending",
+  }
+}
+
+export default function CourtAdminRegisterPage() {
+  const router = useRouter()
+  const currentUser = useStore((state: any) => state.currentUser)
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [form, setForm] = useState(() => buildDefaultForm(null))
+
+  const roleConfig = useMemo(() => getRoleConfig(form.role), [form.role])
 
   useEffect(() => {
-    // clear errors when role changes
+    setForm((current) => ({
+      ...current,
+      createdBy: currentUser?.id || "Current Admin Session",
+    }))
+  }, [currentUser?.id])
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      accessLevel: roleConfig.accessLevel,
+      permissions: { ...DEFAULT_PERMISSIONS[form.role] },
+      title:
+        form.role === "judge"
+          ? "Judge"
+          : form.role === "appeal_judge"
+            ? "Appeal Judge"
+            : form.role === "archive_officer"
+              ? "Archive Officer"
+              : current.title,
+      lastUpdated: new Date().toISOString(),
+    }))
+  }, [form.role, roleConfig.accessLevel])
+
+  function updateForm<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+    setForm((current) => ({
+      ...current,
+      [key]: value,
+      lastUpdated: new Date().toISOString(),
+    }))
+  }
+
+  function updatePermission(key: PermissionKey, checked: boolean) {
+    setForm((current) => ({
+      ...current,
+      permissions: {
+        ...current.permissions,
+        [key]: checked,
+      },
+      lastUpdated: new Date().toISOString(),
+    }))
+  }
+
+  function validateStep(stepToValidate = step) {
+    if (stepToValidate === 1) {
+      if (!form.email.trim() || !form.password.trim() || !form.confirmPassword.trim() || !form.role.trim()) {
+        setError("Complete the account information before moving on.")
+        return false
+      }
+      if (form.password !== form.confirmPassword) {
+        setError("Password and confirm password must match.")
+        return false
+      }
+    }
+
+    if (stepToValidate === 2) {
+      if (!form.fullname.trim() || !form.dateOfBirth || !form.nationalId.trim() || !form.phoneNumber.trim() || !form.residentialAddress.trim()) {
+        setError("Complete the personal details before moving on.")
+        return false
+      }
+    }
+
+    if (stepToValidate === 3) {
+      if (!form.title.trim() || !form.badge.trim() || !form.yearsOfService.trim() || !form.employmentStatus.trim()) {
+        setError("Complete the professional details before moving on.")
+        return false
+      }
+    }
+
+    if (stepToValidate === 4) {
+      if (!form.department.trim() || !form.station.trim() || !form.region.trim()) {
+        setError("Complete the court assignment details before moving on.")
+        return false
+      }
+    }
+
+    if (stepToValidate === 6) {
+      if (!form.securityQuestion.trim() || !form.securityAnswer.trim()) {
+        setError("Complete the security details before moving on.")
+        return false
+      }
+    }
+
     setError("")
-  }, [formData.role])
+    return true
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  function goToStep(nextStep: number) {
+    if (nextStep > step && !validateStep(step)) return
+    setStep(nextStep)
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+    for (const requiredStep of [1, 2, 3, 4, 6]) {
+      if (!validateStep(requiredStep)) {
+        setStep(requiredStep)
+        return
+      }
+    }
+
+    setLoading(true)
     setError("")
-    setSuccess(false)
-    setGeneratedKeys(null)
-
-    if (!formData.role) {
-      setError("Please select a role")
-      return
-    }
-
-    if (formData.role === "clerk" && !formData.assignedJudgeId) {
-      setError("Please assign a judge for the clerk")
-      return
-    }
-
-    if (!formData.name.trim()) {
-      setError("Full Name is required")
-      return
-    }
-
-    if (!formData.email.trim() || !formData.email.includes("@")) {
-      setError("A valid email address is required")
-      return
-    }
-
-    setIsSubmitting(true)
+    setSuccess("")
 
     try {
-      const created = registerUser(
-        {
-          role: formData.role,
-          name: formData.name.trim(),
-          email: formData.email.trim().toLowerCase(),
-          // map your form fields into supported User fields
-          department: formData.role === "judge" ? "Judiciary" : "Court Administration",
-          court: formData.court || undefined,
-          badge: formData.employeeId || undefined,
-          station: undefined,
-          isActive: true,
-        },
-        currentUser?.id
-      )
-
-      // Your store returns full User with generated keys
-      setGeneratedKeys({
-        publicKey: created.publicKey,
-        privateKey: created.privateKey,
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email,
+          fullname: form.fullname,
+          name: form.fullname,
+          password: form.password,
+          role: form.role,
+          badge: form.badge,
+          department: form.department,
+          station: form.station,
+          metadata: {
+            office: "Judiciary",
+            gender: form.gender,
+            dateOfBirth: form.dateOfBirth,
+            nationalId: form.nationalId,
+            phoneNumber: form.phoneNumber,
+            residentialAddress: form.residentialAddress,
+            rank: form.title,
+            yearsOfService: form.yearsOfService,
+            employmentStatus: form.employmentStatus,
+            region: form.region,
+            accessLevel: form.accessLevel,
+            permissions: form.permissions,
+            securityQuestion: form.securityQuestion,
+            securityAnswer: form.securityAnswer,
+            twoFactorEnabled: form.twoFactorEnabled,
+            createdBy: form.createdBy,
+            dateCreated: form.dateCreated,
+            lastUpdated: form.lastUpdated,
+            blockchainAnchorStatus: form.blockchainAnchorStatus,
+          },
+        }),
       })
-      setSuccess(true)
 
-      // reset form
-      setFormData({
-        name: "",
-        email: "",
-        role: "" as CourtRole | "",
-        employeeId: "",
-        court: "High Court Maseru",
-        chamber: "",
-        specialization: "",
-        phoneNumber: "",
-        address: "",
-        dateOfBirth: "",
-        nationalId: "",
-        emergencyContact: "",
-        assignedJudgeId: "",
-        notes: "",
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed")
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data?.error || "Unable to create user.")
+        return
+      }
+
+      setSuccess(`User created successfully. Password: ${data.temporaryPassword}`)
+      setStep(1)
+      setForm(buildDefaultForm(currentUser))
+    } catch {
+      setError("Network error while creating the user.")
     } finally {
-      setIsSubmitting(false)
+      setLoading(false)
     }
   }
 
   return (
-    <DashboardLayout allowedRoles={["court_admin"]} title="Register Staff">
-      <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Register Court Staff</h1>
-          <p className="text-muted-foreground">
-            Add new judges, registry staff, or clerks to the BEJAS system
-          </p>
-        </div>
+    <DashboardLayout allowedRoles={["court_admin", "admin"]} title="Register Court User">
+      <form onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Court User Registration</CardTitle>
+            <CardDescription>
+              Create court admins, registry staff, judges, clerks, appeal staff, and archive users in TiDB with a full judiciary profile.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+              {STEPS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => goToStep(item.id)}
+                  className={`rounded-xl border px-3 py-2.5 text-left transition ${
+                    step === item.id
+                      ? "border-primary bg-primary/8 text-primary shadow-sm"
+                      : "border-border/80 bg-background text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${step === item.id ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+                      {item.id}
+                    </span>
+                    <span className="min-w-0 text-xs font-semibold leading-4 sm:text-[13px]">{item.title}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
 
-        {success && generatedKeys && (
-          <Alert className="border-primary bg-primary/10">
-            <CheckCircle className="h-4 w-4 text-primary" />
-            <AlertTitle className="text-primary">Registration Successful!</AlertTitle>
-            <AlertDescription className="text-foreground">
-              <p className="mb-3">
-                The staff member has been registered. Please save the following keys securely:
-              </p>
-
-              <div className="flex flex-col gap-2 p-3 bg-secondary rounded-lg font-mono text-xs">
-                <div>
-                  <span className="text-muted-foreground">Public Key:</span>
-                  <p className="break-all">{generatedKeys.publicKey}</p>
+            {step === 1 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input type="email" value={form.email} onChange={(e) => updateForm("email", e.target.value)} placeholder="kobobokang27@gmail.com" required />
+                  <p className="text-xs text-muted-foreground">Use a real email address. Placeholder emails like `name@example.com` are rejected.</p>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Private Key (KEEP SECRET):</span>
-                  <p className="break-all text-destructive">{generatedKeys.privateKey}</p>
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Select value={form.role} onValueChange={(value) => updateForm("role", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {COURT_ROLE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Password</Label>
+                  <Input type="text" minLength={8} value={form.password} onChange={(e) => updateForm("password", e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Confirm Password</Label>
+                  <Input type="text" minLength={8} value={form.confirmPassword} onChange={(e) => updateForm("confirmPassword", e.target.value)} required />
                 </div>
               </div>
+            ) : null}
 
-              <p className="mt-3 text-sm text-muted-foreground">
-                Default demo password for newly registered users is <span className="font-medium">password123</span>.
-              </p>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-6">
-            {/* Basic Information */}
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Scale className="h-5 w-5 text-primary" />
-                  Basic Information
-                </CardTitle>
-                <CardDescription>Personal details and account role</CardDescription>
-              </CardHeader>
-
-              <CardContent className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter full name"
-                    required
-                    className="bg-input border-border"
-                  />
+            {step === 2 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Full Name</Label>
+                  <Input value={form.fullname} onChange={(e) => updateForm("fullname", e.target.value)} required />
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="email@court.gov.ls"
-                    required
-                    className="bg-input border-border"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="role">Role *</Label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, role: value as CourtRole })
-                    }
-                  >
-                    <SelectTrigger className="bg-input border-border">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-
+                <div className="space-y-2">
+                  <Label>Gender</Label>
+                  <Select value={form.gender} onValueChange={(value) => updateForm("gender", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="judge">Judge</SelectItem>
-                      <SelectItem value="court_registry">Court Registry</SelectItem>
-                      <SelectItem value="clerk">Judge Clerk</SelectItem>
+                      {GENDERS.map((gender) => (
+                        <SelectItem key={gender} value={gender}>{gender}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="nationalId">National ID *</Label>
-                  <Input
-                    id="nationalId"
-                    value={formData.nationalId}
-                    onChange={(e) => setFormData({ ...formData, nationalId: e.target.value })}
-                    placeholder="National ID number"
-                    required
-                    className="bg-input border-border"
-                  />
+                <div className="space-y-2">
+                  <Label>Date of Birth</Label>
+                  <Input type="date" value={form.dateOfBirth} onChange={(e) => updateForm("dateOfBirth", e.target.value)} required />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Court Details */}
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Gavel className="h-5 w-5 text-primary" />
-                  Court Details
-                </CardTitle>
-                <CardDescription>Employee ID, court, and assignment information</CardDescription>
-              </CardHeader>
-
-              <CardContent className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="employeeId">Employee ID *</Label>
-                  <Input
-                    id="employeeId"
-                    value={formData.employeeId}
-                    onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                    placeholder="e.g., HC-2026-001"
-                    required
-                    className="bg-input border-border"
-                  />
+                <div className="space-y-2">
+                  <Label>National ID / Passport Number</Label>
+                  <Input value={form.nationalId} onChange={(e) => updateForm("nationalId", e.target.value)} required />
                 </div>
+                <div className="space-y-2">
+                  <Label>Phone Number</Label>
+                  <Input value={form.phoneNumber} onChange={(e) => updateForm("phoneNumber", e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Residential Address</Label>
+                  <Input value={form.residentialAddress} onChange={(e) => updateForm("residentialAddress", e.target.value)} required />
+                </div>
+              </div>
+            ) : null}
 
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="court">Court *</Label>
-                  <Select
-                    value={formData.court}
-                    onValueChange={(value) => setFormData({ ...formData, court: value })}
-                  >
-                    <SelectTrigger className="bg-input border-border">
-                      <SelectValue placeholder="Select court" />
-                    </SelectTrigger>
+            {step === 3 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Professional Title</Label>
+                  <Select value={form.title} onValueChange={(value) => updateForm("title", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="High Court Maseru">High Court Maseru</SelectItem>
-                      <SelectItem value="High Court Berea">High Court Berea</SelectItem>
-                      <SelectItem value="Court of Appeal">Court of Appeal</SelectItem>
-                      <SelectItem value="Magistrate Court">Magistrate Court</SelectItem>
+                      {COURT_TITLES.map((title) => (
+                        <SelectItem key={title} value={title}>{title}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label>Badge / Staff Number</Label>
+                  <Input value={form.badge} onChange={(e) => updateForm("badge", e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Years of Service</Label>
+                  <Input type="number" min="0" value={form.yearsOfService} onChange={(e) => updateForm("yearsOfService", e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Employment Status</Label>
+                  <Select value={form.employmentStatus} onValueChange={(value) => updateForm("employmentStatus", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {EMPLOYMENT_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ) : null}
 
-                {formData.role === "judge" && (
-                  <>
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="chamber">Chamber Number</Label>
-                      <Input
-                        id="chamber"
-                        value={formData.chamber}
-                        onChange={(e) => setFormData({ ...formData, chamber: e.target.value })}
-                        placeholder="e.g., Chamber 5"
-                        className="bg-input border-border"
-                      />
-                    </div>
+            {step === 4 ? (
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <Select value={form.department} onValueChange={(value) => updateForm("department", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {JUDICIARY_DEPARTMENTS.map((department) => (
+                        <SelectItem key={department} value={department}>{department}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Court / Station</Label>
+                  <Select value={form.station} onValueChange={(value) => updateForm("station", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {COURT_STATIONS.map((station) => (
+                        <SelectItem key={station} value={station}>{station}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Region</Label>
+                  <Select value={form.region} onValueChange={(value) => updateForm("region", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {COURT_REGIONS.map((region) => (
+                        <SelectItem key={region} value={region}>{region}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ) : null}
 
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="specialization">Specialization</Label>
-                      <Input
-                        id="specialization"
-                        value={formData.specialization}
-                        onChange={(e) =>
-                          setFormData({ ...formData, specialization: e.target.value })
-                        }
-                        placeholder="e.g., Criminal Law"
-                        className="bg-input border-border"
-                      />
-                    </div>
-                  </>
-                )}
+            {step === 5 ? (
+              <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+                <div className="space-y-2">
+                  <Label>Access Level</Label>
+                  <Input value={form.accessLevel} readOnly className="bg-muted/50" />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {PERMISSION_OPTIONS.map((permission) => (
+                    <label key={permission.key} className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3">
+                      <Checkbox checked={form.permissions[permission.key]} onCheckedChange={(checked) => updatePermission(permission.key, checked === true)} />
+                      <span className="text-sm font-medium">{permission.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-                {formData.role === "clerk" && (
-                  <div className="flex flex-col gap-2 md:col-span-2">
-                    <Label htmlFor="assignedJudge">Assigned Judge *</Label>
-                    <Select
-                      value={formData.assignedJudgeId}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, assignedJudgeId: value })
-                      }
-                    >
-                      <SelectTrigger className="bg-input border-border">
-                        <SelectValue placeholder="Select judge to assign clerk to" />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        {judges.length === 0 ? (
-                          <SelectItem value="__none" disabled>
-                            No judges available - register a judge first
-                          </SelectItem>
-                        ) : (
-                          judges.map((judge: User) => (
-                            <SelectItem key={judge.id} value={judge.id}>
-                              {judge.name} â€” {judge.court ?? "Court"}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-
-                    <p className="text-xs text-muted-foreground">
-                      Note: Clerk cases visibility depends on how you assign clerk IDs to cases.
-                    </p>
+            {step === 6 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Security Question</Label>
+                  <Select value={form.securityQuestion} onValueChange={(value) => updateForm("securityQuestion", value)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {SECURITY_QUESTIONS.map((question) => (
+                        <SelectItem key={question} value={question}>{question}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Security Answer</Label>
+                  <Input value={form.securityAnswer} onChange={(e) => updateForm("securityAnswer", e.target.value)} required />
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border px-4 py-4 md:col-span-2">
+                  <div>
+                    <div className="font-medium text-foreground">Two-Factor Authentication (2FA)</div>
+                    <div className="text-sm text-muted-foreground">Enable extra login protection for this judiciary user account.</div>
                   </div>
-                )}
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                  <Input
-                    id="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                    required
-                    className="bg-input border-border"
-                  />
+                  <Switch checked={form.twoFactorEnabled} onCheckedChange={(checked) => updateForm("twoFactorEnabled", checked)} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            ) : null}
 
-            {/* Contact */}
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Lock className="h-5 w-5 text-primary" />
-                  Contact Information
-                </CardTitle>
-                <CardDescription>Address and emergency contact details</CardDescription>
-              </CardHeader>
-
-              <CardContent className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="phoneNumber">Phone Number *</Label>
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
-                    value={formData.phoneNumber}
-                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                    placeholder="+266 XXXX XXXX"
-                    required
-                    className="bg-input border-border"
-                  />
+            {step === 7 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Created By (Admin ID)</Label>
+                  <Input value={form.createdBy} readOnly className="bg-muted/50" />
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="emergencyContact">Emergency Contact *</Label>
-                  <Input
-                    id="emergencyContact"
-                    value={formData.emergencyContact}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emergencyContact: e.target.value })
-                    }
-                    placeholder="Name and phone number"
-                    required
-                    className="bg-input border-border"
-                  />
+                <div className="space-y-2">
+                  <Label>Date Created</Label>
+                  <Input value={new Date(form.dateCreated).toLocaleString()} readOnly className="bg-muted/50" />
                 </div>
-
-                <div className="flex flex-col gap-2 md:col-span-2">
-                  <Label htmlFor="address">Physical Address *</Label>
-                  <Textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Enter full address"
-                    required
-                    className="bg-input border-border"
-                  />
+                <div className="space-y-2">
+                  <Label>Last Updated</Label>
+                  <Input value={new Date(form.lastUpdated).toLocaleString()} readOnly className="bg-muted/50" />
                 </div>
-
-                <div className="flex flex-col gap-2 md:col-span-2">
-                  <Label htmlFor="notes">Additional Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Any additional information..."
-                    className="bg-input border-border"
-                  />
+                <div className="space-y-2">
+                  <Label>Blockchain Anchor Status</Label>
+                  <Input value={form.blockchainAnchorStatus} readOnly className="bg-muted/50" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            ) : null}
 
-            {/* Actions */}
-            <div className="flex gap-3 justify-end">
-              <Button type="button" variant="outline" onClick={() => router.push("/court-admin/dashboard")}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Registering..." : "Register Staff Member"}
-              </Button>
-            </div>
+            {step === 8 ? (
+              <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+                <Card className="border-border/70">
+                  <CardHeader>
+                    <CardTitle className="text-base">Review & Submit</CardTitle>
+                    <CardDescription>Confirm the full court user profile before the account is created in TiDB.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
+                    <div><span className="text-muted-foreground">Email Address:</span> {form.email || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Role:</span> {roleConfig.label}</div>
+                    <div><span className="text-muted-foreground">Full Name:</span> {form.fullname || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Gender:</span> {form.gender}</div>
+                    <div><span className="text-muted-foreground">Date of Birth:</span> {form.dateOfBirth || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">National ID / Passport:</span> {form.nationalId || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Phone Number:</span> {form.phoneNumber || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Residential Address:</span> {form.residentialAddress || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Professional Title:</span> {form.title}</div>
+                    <div><span className="text-muted-foreground">Badge / Staff Number:</span> {form.badge || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Years of Service:</span> {form.yearsOfService || "Not entered"}</div>
+                    <div><span className="text-muted-foreground">Employment Status:</span> {form.employmentStatus}</div>
+                    <div><span className="text-muted-foreground">Department:</span> {form.department}</div>
+                    <div><span className="text-muted-foreground">Court / Station:</span> {form.station}</div>
+                    <div><span className="text-muted-foreground">Region:</span> {form.region}</div>
+                    <div><span className="text-muted-foreground">Access Level:</span> {form.accessLevel}</div>
+                    <div className="md:col-span-2"><span className="text-muted-foreground">Permissions:</span> {PERMISSION_OPTIONS.filter((item) => form.permissions[item.key]).map((item) => item.label).join(", ") || "None selected"}</div>
+                    <div><span className="text-muted-foreground">Security Question:</span> {form.securityQuestion}</div>
+                    <div><span className="text-muted-foreground">2FA:</span> {form.twoFactorEnabled ? "Enabled" : "Disabled"}</div>
+                    <div><span className="text-muted-foreground">Created By:</span> {form.createdBy}</div>
+                    <div><span className="text-muted-foreground">Blockchain Anchor Status:</span> {form.blockchainAnchorStatus}</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/70">
+                  <CardHeader>
+                    <CardTitle className="text-base">Submit & Create User</CardTitle>
+                    <CardDescription>Use back if anything needs correction before saving.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button type="submit" disabled={loading} className="w-full">
+                      {loading ? "Creating..." : "Submit & Create User"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        {error ? <div className="text-sm text-destructive">{error}</div> : null}
+        {success ? <div className="text-sm text-primary">{success}</div> : null}
+
+        <div className="flex flex-wrap justify-between gap-3">
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" onClick={() => router.push("/court-admin/dashboard")}>Cancel</Button>
+            <Button type="button" variant="outline" disabled={step === 1} onClick={() => setStep((current) => Math.max(1, current - 1))}>
+              Back
+            </Button>
           </div>
-        </form>
-      </div>
+          <div className="flex gap-3">
+            {step < 8 ? (
+              <Button type="button" onClick={() => goToStep(step + 1)}>
+                Next
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </form>
     </DashboardLayout>
   )
 }
-
-
-

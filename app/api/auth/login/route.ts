@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { getDbPool } from "@/lib/db";
 import { toCanonicalRole } from "@/lib/roles";
 import { getRoleRoute } from "@/lib/role-routes";
+import { markSuccessfulLogin } from "@/lib/server/users";
 
 type DbUserRow = {
   id: string | number;
@@ -22,6 +23,7 @@ function toBase64Url(value: string) {
 }
 
 async function readJsonBody(req: NextRequest) {
+  // Presentation note: this safely reads login input and prevents the route from crashing on empty or invalid JSON.
   try {
     const text = await req.text();
     if (!text || !text.trim()) {
@@ -39,6 +41,7 @@ async function readJsonBody(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Presentation note: this login endpoint validates credentials, creates the session cookie, and returns the correct dashboard route for the user role.
   try {
     const parsed = await readJsonBody(req);
 
@@ -99,6 +102,18 @@ export async function POST(req: NextRequest) {
     const token = toBase64Url(JSON.stringify(sessionUser));
     const redirectTo = getRoleRoute(canonicalRole);
 
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const ipAddress = forwardedFor?.split(",")[0]?.trim() || null;
+    const userAgent = req.headers.get("user-agent");
+
+    await markSuccessfulLogin({
+      userId: String(user.id),
+      email: user.email,
+      displayName: user.fullname ?? user.name ?? user.email,
+      ipAddress,
+      userAgent,
+    });
+
     const res = NextResponse.json({
       ok: true,
       user: sessionUser,
@@ -121,3 +136,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Server error during login." }, { status: 500 });
   }
 }
+

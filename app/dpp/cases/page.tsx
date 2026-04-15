@@ -11,6 +11,7 @@ export default function DppCasesPage() {
   const list = getAllCases().filter((c) =>
     [
       "submitted_to_dpp",
+      "dpp_registry_intake",
       "assigned_to_prosecutor",
       "returned_to_police",
       "filed_to_small_court",

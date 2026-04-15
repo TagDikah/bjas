@@ -1,0 +1,33 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+\fs24
+\b 4 Users Presentation Notes\b0\par
+\par
+\b Problem Statement:\b0 Manual or weakly protected justice case systems make it difficult to manage records, track workflow changes, and prove that sensitive case data has not been tampered with.\par
+\par
+\b SMART Objective:\b0 To build a justice case management system that allows users to capture, process, store, and verify case records using Next.js, Node.js, TiDB, and blockchain, with traceable workflow actions and integrity checks during the project demonstration period.\par
+\par
+\b Best Team Order:\b0 Next.js, Node.js, TiDB, Blockchain.\par
+\par
+\b User 1 - Next.js:\b0 Handles frontend pages, API routes, user interaction, and form submission flow.\par
+Files: app/police/new-case/page.tsx, app/api/auth/login/route.ts, app/api/cases/route.ts, app/api/blockchain/anchor/route.ts\par
+Functions: POST() in login route, GET() and POST() in cases route, POST() in blockchain anchor route, buildCasePayload().\par
+\par
+\b User 2 - Node.js:\b0 Handles backend logic, authentication, workflow processing, and case management.\par
+Files: lib/server/cases.ts, lib/server/auth-session.ts, lib/server/users.ts\par
+Functions: parseSessionValue(), getSessionUserFromRequest(), createAndSubmitCase(), listCases(), checkpointPoliceCaseStep().\par
+\par
+\b User 3 - TiDB:\b0 Stores the full structured case data in SQL.\par
+Files: lib/db.ts, db/offchain.sql\par
+Functions: getDbPool(), readCaIfProvided(), toBool().\par
+Strong line: TiDB stores the full business record.\par
+\par
+\b User 4 - Blockchain:\b0 Stores the hash for tamper evidence and integrity verification.\par
+Files: lib/blockchain/case-anchor.ts, chain/contracts/CaseAnchor.sol, blockchain API route if needed.\par
+Functions: getContract(), makeCaseHash(), anchorCaseOnChain().\par
+Strong line: Blockchain stores proof of integrity and critical action history.\par
+\par
+\b Combined Team Line:\b0 Next.js handles the interface, Node.js handles the logic, TiDB stores the full data, and blockchain provides proof of integrity.\par
+\par
+\b Final Important Sentence:\b0 The database stores the full business record, while blockchain stores proof of integrity and critical action history.\par
+}

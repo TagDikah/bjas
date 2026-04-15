@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -22,10 +22,15 @@ type ActivityBlock = {
 function getChainSafe(blockchain: any): ActivityBlock[] {
   if (!blockchain) return []
 
-  // Most common patterns
   if (typeof blockchain.getChain === "function") {
     const chain = blockchain.getChain()
     return Array.isArray(chain) ? (chain as ActivityBlock[]) : []
+  }
+
+  if (typeof blockchain.getBlockchain === "function") {
+    const result = blockchain.getBlockchain()
+    if (Array.isArray(result)) return result as ActivityBlock[]
+    if (Array.isArray(result?.chain)) return result.chain as ActivityBlock[]
   }
 
   if (Array.isArray(blockchain.chain)) return blockchain.chain as ActivityBlock[]
@@ -35,17 +40,11 @@ function getChainSafe(blockchain: any): ActivityBlock[] {
 }
 
 export default function PoliceActivityLog() {
-  const { initBlockchain, blockchain } = useStore()
-
-  // Ensure blockchain instance exists
-  useEffect(() => {
-    initBlockchain()
-  }, [initBlockchain])
+  const blockchain = useStore((s: any) => s.blockchain) as any
 
   const blocks = useMemo(() => {
     const chain = getChainSafe(blockchain)
 
-    // Filter police-related blocks
     const policeBlocks = chain.filter((block: ActivityBlock) => {
       const action = block?.data?.action
       return (

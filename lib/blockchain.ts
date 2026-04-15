@@ -1,15 +1,38 @@
-﻿import { ethers } from "ethers"
-import CaseAnchor from "../chain/artifacts/contracts/CaseAnchor.sol/CaseAnchor.json"
+export interface User {
+  id: string
+  name: string
+  fullName?: string
+  email: string
+  role: string
+  station?: string
+  department?: string
+  badgeNumber?: string
+  badge?: string
+  publicKey?: string
+  isActive?: boolean
+  court?: string
+  metadata?: Record<string, any>
+  [key: string]: any
+}
 
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
-const RPC_URL = "http://127.0.0.1:8545"
-
-export function getContract() {
-  const provider = new ethers.JsonRpcProvider(RPC_URL)
-
-  return new ethers.Contract(
-    CONTRACT_ADDRESS,
-    CaseAnchor.abi,
-    provider
-  )
+export interface CaseData {
+  caseId: string
+  caseNumber: string
+  citation?: string
+  district?: string
+  parties?: string
+  charge?: string
+  description?: string
+  evidence?: any[]
+  policeOfficerId?: string
+  policeOfficerName?: string
+  policeStationId?: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  policeSections?: {
+    sectionA?: Record<string, any>
+    [key: string]: any
+  }
+  [key: string]: any
 }

@@ -126,12 +126,20 @@ function RegistryCasesContent() {
   )
 }
 
-export default function RegistryAllCasesPage() {
+function RegistryAllCasesPageContent() {
   return (
     <DashboardLayout allowedRoles={["court_registry"]} title="All Cases">
       <Suspense fallback={<PageLoading />}>
         <RegistryCasesContent />
       </Suspense>
     </DashboardLayout>
+  )
+}
+
+export default function RegistryAllCasesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#071426]" />}>
+      <RegistryAllCasesPageContent />
+    </Suspense>
   )
 }

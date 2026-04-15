@@ -1,0 +1,242 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] /Count 9 >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+3 0 obj
+<< /Length 474 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (Justice Case Management System) Tj
+/F1 18 Tf
+1 0 0 1 50 726 Tm (With Next.js, Node.js, TiDB, and Blockchain) Tj
+/F1 14 Tf
+1 0 0 1 50 694 Tm (Team Presentation) Tj
+1 0 0 1 50 658 Tm (This presentation is divided by technology so that each team member) Tj
+1 0 0 1 50 638 Tm (explains one clear part of the system.) Tj
+1 0 0 1 50 602 Tm (Next.js | Node.js | TiDB | Blockchain) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 1 / 9) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 3 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+5 0 obj
+<< /Length 555 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (Problem Statement) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (Manual or weakly protected justice case systems make it difficult) Tj
+1 0 0 1 50 706 Tm (to manage records, track workflow changes, and prove that sensitive) Tj
+1 0 0 1 50 686 Tm (case data has not been tampered with.) Tj
+1 0 0 1 50 650 Tm (Operational challenge: records move through many workflow stages.) Tj
+1 0 0 1 50 630 Tm (Integrity challenge: important changes must be traceable and verifiable.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 2 / 9) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 5 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 471 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (SMART Objective) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (To build a justice case management system that allows users to capture,) Tj
+1 0 0 1 50 706 Tm (process, store, and verify case records using Next.js, Node.js, TiDB,) Tj
+1 0 0 1 50 686 Tm (and blockchain, with traceable workflow actions and integrity checks) Tj
+1 0 0 1 50 666 Tm (during the project demonstration period.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 3 / 9) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 7 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+9 0 obj
+<< /Length 562 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (Best Team Order) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (1. Next.js) Tj
+1 0 0 1 50 706 Tm (2. Node.js) Tj
+1 0 0 1 50 686 Tm (3. TiDB) Tj
+1 0 0 1 50 666 Tm (4. Blockchain) Tj
+1 0 0 1 50 630 Tm (Reason: user interface -> backend logic -> database storage -> integrity verification) Tj
+1 0 0 1 50 594 Tm (Combined line: Next.js handles the interface, Node.js handles the logic,) Tj
+1 0 0 1 50 574 Tm (TiDB stores the full data, and blockchain provides proof of integrity.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 4 / 9) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 9 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+11 0 obj
+<< /Length 692 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (User 1 - Next.js) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (Part: Frontend pages, API routes, user interaction, form submission flow.) Tj
+1 0 0 1 50 690 Tm (Files:) Tj
+1 0 0 1 50 670 Tm (- app/police/new-case/page.tsx) Tj
+1 0 0 1 50 650 Tm (- app/api/auth/login/route.ts) Tj
+1 0 0 1 50 630 Tm (- app/api/cases/route.ts) Tj
+1 0 0 1 50 610 Tm (- app/api/blockchain/anchor/route.ts) Tj
+1 0 0 1 50 574 Tm (Functions: buildCasePayload\(\), POST\(\) login, GET\(\)/POST\(\) cases, POST\(\) blockchain anchor.) Tj
+1 0 0 1 50 538 Tm (Say: My part is Next.js. It handles the user interface and the API routes.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 5 / 9) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 11 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+13 0 obj
+<< /Length 688 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (User 2 - Node.js) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (Part: Backend logic, authentication handling, workflow processing, case management.) Tj
+1 0 0 1 50 690 Tm (Files:) Tj
+1 0 0 1 50 670 Tm (- lib/server/cases.ts) Tj
+1 0 0 1 50 650 Tm (- lib/server/auth-session.ts) Tj
+1 0 0 1 50 630 Tm (- lib/server/users.ts) Tj
+1 0 0 1 50 594 Tm (Functions: parseSessionValue\(\), getSessionUserFromRequest\(\), listCases\(\),) Tj
+1 0 0 1 50 574 Tm (createAndSubmitCase\(\), checkpointPoliceCaseStep\(\).) Tj
+1 0 0 1 50 538 Tm (Say: My part is Node.js. It handles the server-side logic behind the scenes.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 6 / 9) Tj
+ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 13 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+15 0 obj
+<< /Length 530 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (User 3 - TiDB) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (Part: Database storage, secure connection, structured records, SQL management.) Tj
+1 0 0 1 50 690 Tm (Files:) Tj
+1 0 0 1 50 670 Tm (- lib/db.ts) Tj
+1 0 0 1 50 650 Tm (- db/offchain.sql) Tj
+1 0 0 1 50 630 Tm (- lib/db/tidb.ts) Tj
+1 0 0 1 50 594 Tm (Functions: getDbPool\(\), readCaIfProvided\(\), toBool\(\).) Tj
+1 0 0 1 50 558 Tm (Strong line: TiDB stores the full business record.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 7 / 9) Tj
+ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 15 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+17 0 obj
+<< /Length 684 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (User 4 - Blockchain) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (Part: Integrity verification, hash generation, smart contract interaction, tamper evidence.) Tj
+1 0 0 1 50 690 Tm (Files:) Tj
+1 0 0 1 50 670 Tm (- lib/blockchain/case-anchor.ts) Tj
+1 0 0 1 50 650 Tm (- chain/contracts/CaseAnchor.sol) Tj
+1 0 0 1 50 630 Tm (- app/api/blockchain/anchor/route.ts) Tj
+1 0 0 1 50 610 Tm (- lib/blockchain.ts) Tj
+1 0 0 1 50 574 Tm (Functions: getContract\(\), makeCaseHash\(\), anchorCaseOnChain\(\).) Tj
+1 0 0 1 50 538 Tm (Strong line: Blockchain stores proof of integrity and critical action history.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 8 / 9) Tj
+ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 17 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+19 0 obj
+<< /Length 522 >>
+stream
+BT
+/F1 26 Tf
+50 0 0 50 50 0 Tm
+1 0 0 1 50 760 Tm (Closing) Tj
+/F1 14 Tf
+1 0 0 1 50 726 Tm (Final important sentence:) Tj
+1 0 0 1 50 706 Tm (The database stores the full business record, while blockchain stores proof) Tj
+1 0 0 1 50 686 Tm (of integrity and critical action history.) Tj
+1 0 0 1 50 650 Tm (Short closing:) Tj
+1 0 0 1 50 630 Tm (This system combines usability, backend control, structured storage, and) Tj
+1 0 0 1 50 610 Tm (tamper evidence in one platform.) Tj
+/F1 11 Tf
+1 0 0 1 500 24 Tm (Slide 9 / 9) Tj
+ET
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents 19 0 R /Resources << /Font << /F1 2 0 R >> >> >>
+endobj
+21 0 obj
+<< /Type /Catalog /Pages 1 0 R >>
+endobj
+xref
+0 22
+0000000000 65535 f 
+0000000009 00000 n 
+0000000120 00000 n 
+0000000190 00000 n 
+0000000715 00000 n 
+0000000841 00000 n 
+0000001447 00000 n 
+0000001573 00000 n 
+0000002095 00000 n 
+0000002221 00000 n 
+0000002834 00000 n 
+0000002961 00000 n 
+0000003705 00000 n 
+0000003833 00000 n 
+0000004573 00000 n 
+0000004701 00000 n 
+0000005283 00000 n 
+0000005411 00000 n 
+0000006147 00000 n 
+0000006275 00000 n 
+0000006849 00000 n 
+0000006977 00000 n 
+trailer
+<< /Size 22 /Root 21 0 R >>
+startxref
+7027
+%%EOF

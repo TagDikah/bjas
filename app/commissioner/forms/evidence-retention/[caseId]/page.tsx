@@ -1,75 +1,49 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
-import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useStore } from "@/lib/store"
+import { CommissionerFormShell } from "../../_components/commissioner-form-shell"
 
-export default function CommissionerDashboard() {
-  const { getAllCases } = useStore()
-  const cases = getAllCases()
-
-  const inbox = cases.filter(c => c.status === "pending_commissioner")
-  const clarifications = cases.filter(c => c.status === "commissioner_clarification")
-  const approved = cases.filter(c => c.status === "approved")
-  const rejected = cases.filter(c => c.status === "rejected")
-
+export default function CommissionerEvidenceRetentionFormPage() {
   return (
-    <DashboardLayout allowedRoles={["police_commissioner"]} title="Police Commissioner Dashboard">
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader><CardTitle>Inbox</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{inbox.length}</div>
-            <Button asChild className="w-full"><Link href="/commissioner/cases?tab=inbox">Review Now</Link></Button>
-          </CardContent>
-        </Card>
+    <CommissionerFormShell
+      title="Evidence Retention and Disposal"
+      description="Evidence summary for retention, chain awareness, and disposal decision support."
+    >
+      {({ caseData, sectionA }) => {
+        const seizures = (caseData.policeSeizures ?? []) as any[]
 
-        <Card>
-          <CardHeader><CardTitle>Clarifications</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{clarifications.length}</div>
-            <Button asChild className="w-full" variant="secondary"><Link href="/commissioner/cases?tab=clarifications">Open</Link></Button>
-          </CardContent>
-        </Card>
+        return (
+          <div className="grid gap-4">
+            <Card>
+              <CardHeader><CardTitle>Evidence Summary</CardTitle></CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-2 text-sm">
+                <div><span className="text-muted-foreground">Property or injury record:</span> {sectionA.propertyOrInjury || "N/A"}</div>
+                <div><span className="text-muted-foreground">Recorded seizures:</span> {seizures.length}</div>
+                <div><span className="text-muted-foreground">Case charge:</span> {sectionA.allegedCrime || "N/A"}</div>
+                <div><span className="text-muted-foreground">Station arrest number:</span> {sectionA.stationArrestNumber || "N/A"}</div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Approved</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{approved.length}</div>
-            <Button asChild className="w-full" variant="outline"><Link href="/commissioner/dashboardreports">Reports</Link></Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Rejected</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{rejected.length}</div>
-            <Button asChild className="w-full" variant="outline"><Link href="/commissioner/dashboardreports">Reports</Link></Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle>Quick Links</CardTitle></CardHeader>
-          <CardContent className="grid gap-2">
-            <Button asChild variant="secondary"><Link href="/commissioner/dashboardapprovals">Approvals Queue</Link></Button>
-            <Button asChild variant="secondary"><Link href="/commissioner/dashboardincidents">Incident Dashboard</Link></Button>
-            <Button asChild variant="secondary"><Link href="/commissioner/dashboardaudit">Audit Trail</Link></Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Cool Review Mode</CardTitle></CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Open a case packet to review registration + seizures + investigation side-by-side, verify hashes,
-            redact attachments, and sign approval forms.
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+            <Card>
+              <CardHeader><CardTitle>Seized Items</CardTitle></CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {seizures.length === 0 ? (
+                  <div className="text-muted-foreground">No seizure items recorded yet.</div>
+                ) : (
+                  seizures.map((seizure) => (
+                    <div key={seizure.seizureId} className="rounded-lg border border-border p-3">
+                      <div><span className="text-muted-foreground">Seized at:</span> {seizure.seizedAt || "N/A"}</div>
+                      <div><span className="text-muted-foreground">Location:</span> {seizure.seizureLocation || "N/A"}</div>
+                      <div><span className="text-muted-foreground">Items:</span> {Array.isArray(seizure.items) ? seizure.items.length : 0}</div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }}
+    </CommissionerFormShell>
   )
 }

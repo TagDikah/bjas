@@ -1,75 +1,38 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
-import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useStore } from "@/lib/store"
+import { CommissionerFormShell } from "../../_components/commissioner-form-shell"
 
-export default function CommissionerDashboard() {
-  const { getAllCases } = useStore()
-  const cases = getAllCases()
-
-  const inbox = cases.filter(c => c.status === "pending_commissioner")
-  const clarifications = cases.filter(c => c.status === "commissioner_clarification")
-  const approved = cases.filter(c => c.status === "approved")
-  const rejected = cases.filter(c => c.status === "rejected")
-
+export default function CommissionerUseOfForceFormPage() {
   return (
-    <DashboardLayout allowedRoles={["police_commissioner"]} title="Police Commissioner Dashboard">
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader><CardTitle>Inbox</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{inbox.length}</div>
-            <Button asChild className="w-full"><Link href="/commissioner/cases?tab=inbox">Review Now</Link></Button>
-          </CardContent>
-        </Card>
+    <CommissionerFormShell
+      title="Use-of-Force Review"
+      description="Commissioner review of force indicators, weapons, injuries, and escalation risk."
+    >
+      {({ sectionA }) => (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader><CardTitle>Force Indicators</CardTitle></CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div><span className="text-muted-foreground">Firearm used:</span> {sectionA.firearmSpecify || sectionA.firearmUsed || "N/A"}</div>
+              <div><span className="text-muted-foreground">Weapon used:</span> {sectionA.weaponSpecify || sectionA.weaponUsed || "N/A"}</div>
+              <div><span className="text-muted-foreground">Extent of injury:</span> {sectionA.extentOfInjury || "N/A"}</div>
+              <div><span className="text-muted-foreground">Victim statement taken:</span> {sectionA.victimStatementTaken ? "Yes" : "No"}</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Clarifications</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{clarifications.length}</div>
-            <Button asChild className="w-full" variant="secondary"><Link href="/commissioner/cases?tab=clarifications">Open</Link></Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Approved</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{approved.length}</div>
-            <Button asChild className="w-full" variant="outline"><Link href="/commissioner/dashboardreports">Reports</Link></Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Rejected</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-3xl font-semibold">{rejected.length}</div>
-            <Button asChild className="w-full" variant="outline"><Link href="/commissioner/dashboardreports">Reports</Link></Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle>Quick Links</CardTitle></CardHeader>
-          <CardContent className="grid gap-2">
-            <Button asChild variant="secondary"><Link href="/commissioner/dashboardapprovals">Approvals Queue</Link></Button>
-            <Button asChild variant="secondary"><Link href="/commissioner/dashboardincidents">Incident Dashboard</Link></Button>
-            <Button asChild variant="secondary"><Link href="/commissioner/dashboardaudit">Audit Trail</Link></Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Cool Review Mode</CardTitle></CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Open a case packet to review registration + seizures + investigation side-by-side, verify hashes,
-            redact attachments, and sign approval forms.
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+          <Card>
+            <CardHeader><CardTitle>Risk Factors</CardTitle></CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div><span className="text-muted-foreground">Drink related:</span> {sectionA.drinkRelated || "N/A"}</div>
+              <div><span className="text-muted-foreground">Drug related:</span> {sectionA.drugRelated || "N/A"}</div>
+              <div><span className="text-muted-foreground">Relationship:</span> {sectionA.offenderVictimRelationship || "N/A"}</div>
+              <div className="whitespace-pre-wrap"><span className="text-muted-foreground">Suspect details:</span> {sectionA.suspectDetails || "N/A"}</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </CommissionerFormShell>
   )
 }

@@ -5,6 +5,7 @@ import { FileText, Clock, CheckCircle, ArrowRight, AlertTriangle } from "lucide-
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { StatsCard } from "@/components/stats-card"
 import { CaseCard } from "@/components/case-card"
+import { WorkflowAnalytics } from "@/components/workflow-analytics"
 import { Button } from "@/components/ui/button"
 import { useStore } from "@/lib/store"
 
@@ -13,8 +14,16 @@ export default function DppDashboard() {
   const all = getAllCases()
 
   const pending = all.filter((c) => c.status === "submitted_to_dpp")
+  const registered = all.filter((c) => c.status === "dpp_registry_intake")
   const assigned = all.filter((c) => c.status === "assigned_to_prosecutor")
   const escalations = all.filter((c) => c.status === "small_court_requests_high_court")
+
+  const recommendation =
+    pending.length > registered.length
+      ? "Register commissioner-approved files in the DPP office first so prosecutors receive complete trial packets."
+      : assigned.length < registered.length
+        ? "More registered files are waiting than assigned. Allocate prosecutors next to keep the prosecution line moving."
+        : "The DPP workflow is balanced. Focus on returns to police and escalations that may delay trial readiness."
 
   return (
     <DashboardLayout allowedRoles={["dpp"]} title="DPP Dashboard">
@@ -22,9 +31,11 @@ export default function DppDashboard() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Welcome, {currentUser?.name?.split(" ")[0]}</h2>
-            <p className="text-muted-foreground">Review registered cases, assign prosecutors, and approve escalations.</p>
+            <p className="text-muted-foreground">
+              Register cases from the police commissioner, assign prosecutors, and control prosecution flow.
+            </p>
           </div>
-          <Link href="/dpp/dashboardreview">
+          <Link href="/dpp/review">
             <Button>
               Open Review
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -33,17 +44,29 @@ export default function DppDashboard() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard title="Pending Review" value={pending.length} description="Awaiting DPP" icon={Clock} />
-          <StatsCard title="Assigned" value={assigned.length} description="With prosecutors" icon={CheckCircle} />
-          <StatsCard title="Escalations" value={escalations.length} description="Small â†’ High Court" icon={AlertTriangle} />
-          <StatsCard title="Total" value={all.length} description="All cases" icon={FileText} />
+          <StatsCard title="Awaiting DPP" value={pending.length} description="From commissioner" icon={Clock} />
+          <StatsCard title="DPP Registered" value={registered.length} description="Filed in DPP office" icon={CheckCircle} />
+          <StatsCard title="Assigned" value={assigned.length} description="With prosecutors" icon={FileText} />
+          <StatsCard title="Escalations" value={escalations.length} description="Awaiting direction" icon={AlertTriangle} />
         </div>
 
-        {pending.length ? (
+        <WorkflowAnalytics
+          title="DPP Pipeline Analytics"
+          subtitle="Bar-chart style view of prosecution workload."
+          items={[
+            { label: "Awaiting DPP registration", value: pending.length, tone: pending.length > registered.length ? "warning" : "default" },
+            { label: "Registered in DPP office", value: registered.length },
+            { label: "Assigned to prosecutors", value: assigned.length, tone: "success" },
+            { label: "Escalations to review", value: escalations.length, tone: "warning" },
+          ]}
+          recommendation={recommendation}
+        />
+
+        {[...pending, ...registered].length ? (
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-3">Next to review</h3>
+            <h3 className="mb-3 text-lg font-semibold text-foreground">Next to review</h3>
             <div className="grid gap-4 md:grid-cols-2">
-              {pending.slice(0, 4).map((c) => (
+              {[...pending, ...registered].slice(0, 4).map((c) => (
                 <CaseCard key={c.caseId} caseData={c} />
               ))}
             </div>

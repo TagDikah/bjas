@@ -110,12 +110,20 @@ function AIAssignmentContent() {
   )
 }
 
-export default function AIAssignmentPage() {
+function AIAssignmentPageContent() {
   return (
     <DashboardLayout allowedRoles={["court_registry"]} title="AI Judge Assignment">
       <Suspense fallback={<PageLoading />}>
         <AIAssignmentContent />
       </Suspense>
     </DashboardLayout>
+  )
+}
+
+export default function AIAssignmentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#071426]" />}>
+      <AIAssignmentPageContent />
+    </Suspense>
   )
 }
