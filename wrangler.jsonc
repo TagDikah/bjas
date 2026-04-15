@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "lesotho-justice-app",
+  "name": "bjas",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-04-15",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -12,7 +12,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "lesotho-justice-app"
+      "service": "bjas"
     }
   ],
   "vars": {
